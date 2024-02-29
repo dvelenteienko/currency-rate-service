@@ -1,0 +1,24 @@
+server:
+  port: 8082
+  servlet.context-path: /currency/v1/api
+
+spring:
+  application.name: currency
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: validate
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/currency_database
+    username: currency
+    password: currency
+
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.yaml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
