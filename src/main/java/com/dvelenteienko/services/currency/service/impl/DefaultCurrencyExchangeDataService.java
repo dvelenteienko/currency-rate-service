@@ -2,14 +2,15 @@ package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.config.CurrencyClientApiConfigProperties;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
-import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyData;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyRateResponse;
+import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -18,9 +19,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,10 +30,10 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
     private final CurrencyClientApiConfigProperties currencyClientApiConfigProperties;
 
     @Override
-    public List<CurrencyRateDto> getCurrencyRateDtos(String baseCurrency, Set<String> currencies) {
+    public List<CurrencyRateDto> getCurrencyRateDtos(String baseCurrency, Set<String> codes) {
         List<CurrencyRateDto> currencyRateDtos = new ArrayList<>();
-        if (StringUtils.isNotBlank(baseCurrency) && !currencies.isEmpty()) {
-            CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, currencies);
+        if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
+            CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
             final LocalDate lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
             currencyRateDtos = response.data().entrySet().stream()
                     .map(e -> new CurrencyRateDto(e.getValue().code(), baseCurrency, lastUpdatedAt, e.getValue().value()))

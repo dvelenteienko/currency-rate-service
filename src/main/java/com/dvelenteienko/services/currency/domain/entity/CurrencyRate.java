@@ -1,9 +1,7 @@
 package com.dvelenteienko.services.currency.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -11,8 +9,9 @@ import java.util.UUID;
 @Entity
 @Getter
 @Table(name = "rates")
-@SuperBuilder(setterPrefix = "set")
 @EqualsAndHashCode(of = "id")
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CurrencyRate {
 
     @Id
@@ -21,7 +20,7 @@ public class CurrencyRate {
     @Column(nullable = false)
     private String source;
     @Column(nullable = false)
-    private String target;
+    private String base;
     @Column(nullable = false)
     private LocalDate date;
     @Column(nullable = false, scale = 10)

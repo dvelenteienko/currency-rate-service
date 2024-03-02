@@ -15,13 +15,12 @@ public interface CurrencyRepository extends JpaRepository<Currency, UUID> {
     Optional<Currency> findTopByCode(String code);
     Optional<Currency> findTopByType(CurrencyType type);
 
-    default Set<String> getCodes() {
-        return findAll().stream()
+    List<Currency> findByType(CurrencyType type);
+
+    default Set<String> getCodesByType(CurrencyType type) {
+        return findByType(type).stream()
                 .map(Currency::getCode)
                 .collect(Collectors.toSet());
     }
 
-    default List<Currency> getCodesWithType() {
-        return findAll();
-    }
 }

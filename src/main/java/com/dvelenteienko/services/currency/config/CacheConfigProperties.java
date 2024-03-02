@@ -13,4 +13,5 @@ public class CacheConfigProperties {
 
     private String currencyName;
     private String rateName;
+
 }

@@ -1,71 +1,76 @@
 package com.dvelenteienko.services.currency.service.impl;
 
+import com.dvelenteienko.services.currency.config.DefaultCacheConfig;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.repository.CurrencyRepository;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-@Transactional("transactionManager")
+@CacheConfig(cacheNames = {DefaultCacheConfig.CURRENCY_CACHE_NAME})
 public class DefaultCurrencyService implements CurrencyService {
 
     private final CurrencyRepository currencyRepository;
 
     @Override
+    @Cacheable
+    @Transactional(readOnly = true, value = "transactionManager")
+    public List<CurrencyDto> getCurrencies() {
+        return CurrencyDto.fromAll(currencyRepository.findAll());
+    }
+
     public Set<String> getCurrencyCodes() {
-        return currencyRepository.getCodes();
+        return getCurrencies().stream()
+                .map(CurrencyDto::getCode)
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public List<Currency> getCurrencies() {
-        return currencyRepository.getCodesWithType();
-    }
-
-    @Override
-    public Currency createCurrency(String code, CurrencyType type) {
-        Currency currency = null;
+    @CachePut
+    @Transactional("transactionManager")
+    public CurrencyDto createCurrency(String code, CurrencyType type) {
+        CurrencyDto currencyDto = null;
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);
         if (currencyOpt.isEmpty()) {
-            currency = Currency.builder()
-                    .setCode(code)
-                    .setType(type)
-                    .build();
+            Currency currency = new Currency(null, code, type);
             updateBaseType(currency);
+            currencyDto = CurrencyDto.from(currency);
         }
-        return currency;
+        return currencyDto;
     }
 
     @Override
-    public Currency updateCurrencyTypeByCode(String code, CurrencyType type) {
-        Currency currency = null;
+    @CachePut
+    @Transactional("transactionManager")
+    public CurrencyDto updateCurrency(String code, CurrencyType type) {
+        CurrencyDto currencyDto = null;
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);
         if (currencyOpt.isPresent()) {
             Currency currencyFrom = currencyOpt.get();
-            Currency currencyToUpdate = Currency.builder()
-                    .setId(currencyFrom.getId())
-                    .setCode(currencyFrom.getCode())
-                    .setType(type)
-                    .build();
-
+            Currency currencyToUpdate = new Currency(currencyFrom.getId(), currencyFrom.getCode(), type);
             boolean invalidCurrencyTypeToUpdate = currencyFrom.getType() == CurrencyType.BASE && type != CurrencyType.BASE;
-            if (currencyFrom.getType() == type && currencyFrom.getCode().equals(code)) {
-                currency = currencyFrom;
-            } else if (currencyFrom.getCode().equals(code) && invalidCurrencyTypeToUpdate) {
-                currency = currencyFrom;
+            boolean sameCurrency = currencyFrom.getType() == type && currencyFrom.getCode().equals(code);
+            if ((currencyFrom.getCode().equals(code) && invalidCurrencyTypeToUpdate) || sameCurrency) {
+                currencyDto = CurrencyDto.from(currencyFrom);
             } else {
                 updateBaseType(currencyToUpdate);
-                currency = currencyToUpdate;
+                currencyDto = CurrencyDto.from(currencyToUpdate);
             }
         }
-        return currency;
+        return currencyDto;
     }
 
     private void updateBaseType(Currency sourceCurrency) {
@@ -73,14 +78,12 @@ public class DefaultCurrencyService implements CurrencyService {
             Optional<Currency> baseTypeCurrencyOpt = currencyRepository.findTopByType(CurrencyType.BASE);
             if (baseTypeCurrencyOpt.isPresent()) {
                 Currency currency = baseTypeCurrencyOpt.get();
-                Currency currencyToSave = Currency.builder()
-                        .setId(currency.getId())
-                        .setCode(currency.getCode())
-                        .setType(CurrencyType.SOURCE)
-                        .build();
+                Currency currencyToSave = new Currency(currency.getId(), currency.getCode(), CurrencyType.SOURCE);
                 currencyRepository.save(currencyToSave);
             }
         }
         currencyRepository.save(sourceCurrency);
     }
+
+
 }
