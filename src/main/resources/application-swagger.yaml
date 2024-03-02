@@ -1,0 +1,9 @@
+springdoc:
+  paths-to-match: /api/v1/**
+  swagger-ui:
+    deep-linking: true
+    default-model-rendering: example
+    doc-expansion: none
+    operations-sorted: alpha
+    tags-sorted: alpha
+    path: /swagger-ui

@@ -1,0 +1,8 @@
+Configuration:
+  status: warn
+
+  appenders:
+    Console:
+      name: LogToConsole
+      PatternLayout:
+        Pattern: "%level [%t] %c{1} - %msg%n"

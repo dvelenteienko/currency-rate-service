@@ -1,6 +1,6 @@
 server:
   port: 8082
-  servlet.context-path: /currency/v1/api
+  servlet.context-path: /currency
 
 spring:
   application.name: currency
@@ -21,4 +21,23 @@ management:
     web:
       exposure:
         include: '*'
+
+service:
+  currency:
+    transit-currency-code: USD
+  currency-client-api:
+    url: https://api.currencyapi.com/v3/latest
+    apiKey: cur_live_kOg81YiKjCnGVX6qG1BTq7OjnlXGyJiPHIE7ynMj
+    base-currency-attr: base_currency
+    currencies-attr: currencies
+  cache:
+    currency-name: currencies
+    rate-name: rates
+
+logging.level:
+  liquibase: INFO
+  org.hibernate.stat: DEBUG
+  org.springframework.web: DEBUG
+  com.dvelenteienko.services.currency: DEBUG
+
 
