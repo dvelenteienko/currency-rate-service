@@ -15,8 +15,6 @@ public class DefaultCacheConfig {
     public static final String CURRENCY_CACHE_NAME = "currencies";
     public static final String RATE_CACHE_NAME = "rates";
 
-    private final CacheConfigProperties cacheConfigProperties;
-
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(CURRENCY_CACHE_NAME, RATE_CACHE_NAME);

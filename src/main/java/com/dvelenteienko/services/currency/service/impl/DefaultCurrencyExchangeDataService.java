@@ -33,8 +33,8 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
         if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
             CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
             final LocalDateTime lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
-            currencyRateDtos = response.data().entrySet().stream()
-                    .map(e -> new CurrencyRateDto(e.getValue().code(), baseCurrency, lastUpdatedAt, e.getValue().value()))
+            currencyRateDtos = response.data().values().stream()
+                    .map(currencyData -> new CurrencyRateDto(currencyData.code(), baseCurrency, lastUpdatedAt, currencyData.value()))
                     .toList();
         }
         return currencyRateDtos;

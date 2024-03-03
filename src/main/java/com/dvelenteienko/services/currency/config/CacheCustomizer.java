@@ -7,10 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-//@AllArgsConstructor
 public class CacheCustomizer implements CacheManagerCustomizer<ConcurrentMapCacheManager> {
-
-//    private final CacheConfigProperties cacheConfigProperties;
 
     @Override
     public void customize(ConcurrentMapCacheManager cacheManager) {

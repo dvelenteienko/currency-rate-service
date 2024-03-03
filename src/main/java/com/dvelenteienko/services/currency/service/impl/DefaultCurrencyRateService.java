@@ -5,7 +5,6 @@ import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
 import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
-import com.dvelenteienko.services.currency.repository.CurrencyRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import lombok.AllArgsConstructor;

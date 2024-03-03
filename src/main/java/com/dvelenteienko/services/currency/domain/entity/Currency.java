@@ -3,7 +3,6 @@ package com.dvelenteienko.services.currency.domain.entity;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 

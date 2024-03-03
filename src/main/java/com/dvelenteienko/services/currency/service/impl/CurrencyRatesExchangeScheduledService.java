@@ -22,7 +22,7 @@ public class CurrencyRatesExchangeScheduledService {
     private final CurrencyService currencyService;
 
     @Scheduled(cron = "${service.scheduler.cron}")
-    public void retrieveCurrencyExchangeRate() throws InterruptedException {
+    public void retrieveCurrencyExchangeRate() {
       log.info("Starting scheduler of retrieve currency rates");
       String baseCode = currencyService.getCurrencyCodes(CurrencyType.BASE).stream()
               .filter(StringUtils::isNotBlank)
