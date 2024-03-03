@@ -8,7 +8,7 @@ import com.dvelenteienko.services.currency.repository.CurrencyRepository;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -32,14 +31,14 @@ public class DefaultCurrencyService implements CurrencyService {
         return CurrencyDto.fromAll(currencyRepository.findAll());
     }
 
-    public Set<String> getCurrencyCodes() {
-        return getCurrencies().stream()
-                .map(CurrencyDto::getCode)
-                .collect(Collectors.toSet());
+    @Override
+    @Cacheable
+    public Set<String> getCurrencyCodes(CurrencyType type) {
+        return currencyRepository.getCodesByType(type);
     }
 
     @Override
-    @CachePut
+    @CacheEvict(value = DefaultCacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
     @Transactional("transactionManager")
     public CurrencyDto createCurrency(String code, CurrencyType type) {
         CurrencyDto currencyDto = null;
@@ -53,8 +52,8 @@ public class DefaultCurrencyService implements CurrencyService {
     }
 
     @Override
-    @CachePut
     @Transactional("transactionManager")
+    @CacheEvict(value = DefaultCacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
     public CurrencyDto updateCurrency(String code, CurrencyType type) {
         CurrencyDto currencyDto = null;
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);

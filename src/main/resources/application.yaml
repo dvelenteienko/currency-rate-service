@@ -33,11 +33,24 @@ service:
   cache:
     currency-name: currencies
     rate-name: rates
+  scheduler:
+    enabled: false
+    cron: 0/30 * * ? * *
 
 logging.level:
   liquibase: INFO
   org.hibernate.stat: DEBUG
   org.springframework.web: DEBUG
   com.dvelenteienko.services.currency: DEBUG
+
+springdoc:
+  paths-to-match: /api/v1/**
+  swagger-ui:
+    deep-linking: true
+    default-model-rendering: example
+    doc-expansion: none
+    operations-sorted: alpha
+    tags-sorted: alpha
+    path: /swagger-ui
 
 

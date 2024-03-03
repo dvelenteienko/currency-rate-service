@@ -7,6 +7,6 @@ import java.util.Set;
 
 public interface CurrencyExchangeDataService {
 
-    List<CurrencyRateDto> getCurrencyRateDtos(String baseCurrency, Set<String> codes);
+    List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, Set<String> codes);
 
 }

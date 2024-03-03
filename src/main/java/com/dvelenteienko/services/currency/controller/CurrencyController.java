@@ -2,10 +2,7 @@ package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
-import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
-import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,25 +12,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(Api.BASE_URL + "/currencies")
 public class CurrencyController {
 
-    private final CurrencyExchangeDataService currencyExchangeDataService;
     private final CurrencyService currencyService;
-
-    @GetMapping(path = "/client", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CurrencyRateDto> getCurrencies() {
-        return currencyExchangeDataService.getCurrencyRateDtos("USD", Set.of("EUR", "GBP"));
-    }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCurrencies(@RequestParam(required = false) boolean showType) {
         ResponseEntity<?> responseEntity;
-        responseEntity = showType ? new ResponseEntity<>(currencyService.getCurrencies(), HttpStatus.OK)
-                 : new ResponseEntity<>(currencyService.getCurrencyCodes(), HttpStatus.OK);
+        List<CurrencyDto> currencyDtos = currencyService.getCurrencies();
+        Set<String> codes = currencyDtos.stream()
+                .map(CurrencyDto::getCode)
+                .collect(Collectors.toSet());
+        responseEntity = showType ? new ResponseEntity<>(currencyDtos, HttpStatus.OK)
+                 : new ResponseEntity<>(codes, HttpStatus.OK);
         return responseEntity;
 
     }

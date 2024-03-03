@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
@@ -15,14 +16,14 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RequestPeriodDto {
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate from;
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate to;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime from;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime to;
 
     @AssertTrue
     @JsonIgnore
-    protected boolean isValid() {
-        return !from.isAfter(to) && !to.isAfter(LocalDate.now());
+    public boolean isValid() {
+        return !from.isAfter(to) && !to.isAfter(LocalDateTime.now());
     }
 }

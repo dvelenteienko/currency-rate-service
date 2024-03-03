@@ -3,18 +3,16 @@ package com.dvelenteienko.services.currency.service.impl;
 import com.dvelenteienko.services.currency.config.CurrencyClientApiConfigProperties;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyRateResponse;
-import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -30,11 +28,11 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
     private final CurrencyClientApiConfigProperties currencyClientApiConfigProperties;
 
     @Override
-    public List<CurrencyRateDto> getCurrencyRateDtos(String baseCurrency, Set<String> codes) {
+    public List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, Set<String> codes) {
         List<CurrencyRateDto> currencyRateDtos = new ArrayList<>();
         if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
             CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
-            final LocalDate lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
+            final LocalDateTime lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
             currencyRateDtos = response.data().entrySet().stream()
                     .map(e -> new CurrencyRateDto(e.getValue().code(), baseCurrency, lastUpdatedAt, e.getValue().value()))
                     .toList();
@@ -62,9 +60,9 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
         return responseEntity.getBody();
     }
 
-    private LocalDate parseDate(String dateTimeString) {
+    private LocalDateTime parseDate(String dateTimeString) {
         Instant instant = Instant.parse(dateTimeString);
         ZonedDateTime zonedDateTime = instant.atZone(ZoneId.of("UTC"));
-        return zonedDateTime.toLocalDate();
+        return zonedDateTime.toLocalDateTime();
     }
 }

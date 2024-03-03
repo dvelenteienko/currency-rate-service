@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +23,7 @@ public class CurrencyRate {
     @Column(nullable = false)
     private String base;
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime date;
     @Column(nullable = false, scale = 10)
     private Double rate;
 }

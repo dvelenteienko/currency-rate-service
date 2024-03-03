@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface CurrencyService {
-
-    Set<String> getCurrencyCodes();
+    Set<String> getCurrencyCodes(CurrencyType type);
     List<CurrencyDto> getCurrencies();
     CurrencyDto createCurrency(String code, CurrencyType type);
     CurrencyDto updateCurrency(String code, CurrencyType type);
