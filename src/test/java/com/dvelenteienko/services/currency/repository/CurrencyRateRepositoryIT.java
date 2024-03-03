@@ -1,7 +1,6 @@
 package com.dvelenteienko.services.currency.repository;
 
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
-import com.github.database.rider.core.api.dataset.CompareOperation;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.junit5.api.DBRider;
