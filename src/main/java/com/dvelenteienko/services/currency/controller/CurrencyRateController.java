@@ -6,6 +6,7 @@ import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,7 +27,10 @@ public class CurrencyRateController {
     private final CurrencyService currencyService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCurrencyRates(@RequestParam String baseCurrencyCode, @RequestParam String dateFrom,
+    public ResponseEntity<?> getCurrencyRates(@RequestParam String baseCurrencyCode,
+                                              @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
+                                              @RequestParam String dateFrom,
+                                              @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
                                               @RequestParam String dateTo) {
         ResponseEntity<?> responseEntity;
         final LocalDate from = LocalDate.parse(dateFrom);

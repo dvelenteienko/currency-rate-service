@@ -4,6 +4,7 @@ import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.service.CurrencyService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ public class CurrencyController {
         return responseEntity;
     }
 
+    @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public CurrencyDto addCurrency(@RequestBody CurrencyDto currencyRequest) {
         CurrencyType currencyType = getCurrencyType(currencyRequest);
@@ -46,6 +48,7 @@ public class CurrencyController {
         return currencyDto;
     }
 
+    @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public CurrencyDto updateCurrency(@RequestBody CurrencyDto currencyRequest) {
         CurrencyType currencyType = getCurrencyType(currencyRequest);
