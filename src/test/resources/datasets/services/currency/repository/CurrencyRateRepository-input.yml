@@ -1,0 +1,26 @@
+rates:
+  - id: "286deb24-4a12-4676-abdd-416c9d8b4ab1"
+    source: "CAD"
+    base: "USD"
+    date: "2021-12-11 23:59:59.000"
+    rate: 0.78
+  - id: "286deb24-4a12-4676-abdd-416c9d8b4ab2"
+    source: "CAD"
+    base: "USD"
+    date: "2021-12-11 22:59:59.000"
+    rate: 0.78
+  - id: "2ac4c549-79c1-4c7c-9efa-fd44d1eaa049"
+    source: "EUR"
+    base: "USD"
+    date: "2021-12-11 23:59:59.000"
+    rate: 1.77
+  - id: "9ba71bd5-2f31-4878-a7f1-2c72fc7b0527"
+    source: "GBP"
+    base: "USD"
+    date: "2021-12-12 23:59:59.000"
+    rate: 2.73
+  - id: "9ba71bd5-2f31-3333-a7f1-2c72fc7b0527"
+    source: "USD"
+    base: "EUR"
+    date: "2021-12-12 23:59:59.000"
+    rate: 1.73

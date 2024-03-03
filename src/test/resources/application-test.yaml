@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        generate_statistics: false
+    hibernate:
+      ddl-auto: create
+  liquibase:
+    enabled: false
+
+zonky.test.database:
+  provider: zonky
+  type: postgres
+  postgres.client.properties:
+    stringtype: unspecified

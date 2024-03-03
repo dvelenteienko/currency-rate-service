@@ -43,7 +43,7 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
 
     @Override
     @CacheEvict(value = DefaultCacheConfig.RATE_CACHE_NAME, allEntries=true)
-    public List<CurrencyRateDto> createCurrencyRates(String baseCode, Set<String> codes) {
+    public List<CurrencyRateDto> createCurrencyRate(String baseCode, Set<String> codes) {
         if (codes.isEmpty()) {
             codes.add(baseCode);
         }

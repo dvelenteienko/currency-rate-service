@@ -54,7 +54,7 @@ public class CurrencyRateController {
             response = new ResponseEntity<>("The currency code " + code + " is not a BASE currency", HttpStatus.BAD_REQUEST);
         } else {
             Set<String> sourceCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
-            List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRates(code, sourceCodes);
+            List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRate(code, sourceCodes);
             response = new ResponseEntity<>(currencyRateDtos, HttpStatus.OK);
         }
 

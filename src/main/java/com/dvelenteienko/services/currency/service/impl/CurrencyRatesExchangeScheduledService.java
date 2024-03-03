@@ -31,7 +31,7 @@ public class CurrencyRatesExchangeScheduledService {
       if (StringUtils.isNotBlank(baseCode)) {
           Set<String> currencyCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
           log.info("Prepare parameters. Base currency code: {}; Source codes: {}", baseCode, currencyCodes.size());
-          List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRates(baseCode, currencyCodes);
+          List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRate(baseCode, currencyCodes);
           log.info("Currency rates successfully retrieved. Count: {}", currencyRateDtos.size());
       }
     }

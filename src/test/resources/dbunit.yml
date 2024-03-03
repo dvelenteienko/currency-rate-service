@@ -1,0 +1,4 @@
+cacheConnection: false
+caseInsensitiveStrategy: LOWERCASE
+properties:
+  caseSensitiveTableNames: false

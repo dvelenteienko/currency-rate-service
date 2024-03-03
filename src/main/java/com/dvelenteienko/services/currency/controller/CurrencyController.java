@@ -25,23 +25,25 @@ public class CurrencyController {
     public ResponseEntity<?> getCurrencies(@RequestParam(required = false) boolean showType) {
         ResponseEntity<?> responseEntity;
         List<CurrencyDto> currencyDtos = currencyService.getCurrencies();
-        Set<String> codes = currencyDtos.stream()
-                .map(CurrencyDto::getCode)
-                .collect(Collectors.toSet());
-        responseEntity = showType ? new ResponseEntity<>(currencyDtos, HttpStatus.OK)
-                 : new ResponseEntity<>(codes, HttpStatus.OK);
+        if (showType) {
+            responseEntity = new ResponseEntity<>(currencyDtos, HttpStatus.OK);
+        } else {
+            Set<String> codes = currencyDtos.stream()
+                    .map(CurrencyDto::getCode)
+                    .collect(Collectors.toSet());
+            responseEntity = new ResponseEntity<>(codes, HttpStatus.OK);
+        }
         return responseEntity;
-
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public CurrencyDto addCurrency(@RequestBody CurrencyDto currencyRequest) {
         CurrencyType currencyType = getCurrencyType(currencyRequest);
-        CurrencyDto currency = currencyService.createCurrency(currencyRequest.getCode(), currencyType);
-        if (currency == null) {
+        CurrencyDto currencyDto = currencyService.createCurrency(currencyRequest.getCode(), currencyType);
+        if (currencyDto == null) {
             return currencyRequest;
         }
-        return currency;
+        return currencyDto;
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,5 +63,5 @@ public class CurrencyController {
         }
         return currencyType;
     }
-    
+
 }

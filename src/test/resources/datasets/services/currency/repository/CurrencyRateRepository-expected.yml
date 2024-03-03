@@ -1,0 +1,11 @@
+rates:
+  - id: "9ba71bd5-2f31-1313-a7f1-2c72fc7b0527"
+    source: "CAD"
+    base: "EUR"
+    date: "2021-12-13 23:59:59.000"
+    rate: 3.2332
+  - id: "286deb24-4a12-4676-abdd-416c9d8b4ab1"
+    source: "CAD"
+    base: "USD"
+    date: "2021-12-11 23:59:59.000"
+    rate: 0.78

@@ -1,0 +1,7 @@
+currency:
+  - id: "00000001-0000-0000-0000-000000000001"
+    code: "USD"
+    type: "BASE"
+  - id: "4886b38c-672e-4a8d-1331-a9c90365be0e"
+    code: "AUD"
+    type: "SOURCE"

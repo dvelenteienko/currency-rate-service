@@ -1,0 +1,13 @@
+currency:
+  - id: "c30d9412-e168-4f2a-86ee-d283a89736f7"
+    code: "CAD"
+    type: "SOURCE"
+  - id: "4886b38c-672e-4a8d-96dd-a9c90365be0e"
+    code: "GBP"
+    type: "SOURCE"
+  - id: "ff6fe406-9115-4cf8-9892-f516f74f5a61"
+    code: "EUR"
+    type: "SOURCE"
+  - id: "00000001-0000-0000-0000-000000000001"
+    code: "USD"
+    type: "BASE"
