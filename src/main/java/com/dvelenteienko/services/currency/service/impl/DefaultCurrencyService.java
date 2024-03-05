@@ -1,44 +1,49 @@
 package com.dvelenteienko.services.currency.service.impl;
 
-import com.dvelenteienko.services.currency.config.DefaultCacheConfig;
+import com.dvelenteienko.services.currency.config.CustomCacheResolver;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.repository.CurrencyRepository;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
-@CacheConfig(cacheNames = {DefaultCacheConfig.CURRENCY_CACHE_NAME})
 public class DefaultCurrencyService implements CurrencyService {
 
     private final CurrencyRepository currencyRepository;
+    private CustomCacheResolver currencyCacheResolver;
+
 
     @Override
-    @Cacheable
     @Transactional(readOnly = true, value = "transactionManager")
     public List<CurrencyDto> getCurrencies() {
-        return CurrencyDto.fromAll(currencyRepository.findAll());
+        List<CurrencyDto> currencies = currencyCacheResolver.getFromCache();
+        if (currencies.isEmpty()) {
+            currencies = currencyCacheResolver.putToCache(CurrencyDto.fromAll(currencyRepository.findAll()));
+        }
+        return currencies;
     }
 
     @Override
-    @Cacheable
     public Set<String> getCurrencyCodes(CurrencyType type) {
-        return currencyRepository.getCodesByType(type);
+        return getCurrencies().stream()
+                .filter(c -> c.getType() == type)
+                .map(CurrencyDto::getCode)
+                .collect(Collectors.toSet());
     }
 
     @Override
-    @CacheEvict(value = DefaultCacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
     @Transactional("transactionManager")
     public CurrencyDto createCurrency(String code, CurrencyType type) {
         CurrencyDto currencyDto = null;
@@ -47,13 +52,13 @@ public class DefaultCurrencyService implements CurrencyService {
             Currency currency = new Currency(null, code, type);
             updateBaseType(currency);
             currencyDto = CurrencyDto.from(currency);
+            currencyCacheResolver.putToCache(List.of(currencyDto));
         }
         return currencyDto;
     }
 
     @Override
     @Transactional("transactionManager")
-    @CacheEvict(value = DefaultCacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
     public CurrencyDto updateCurrency(String code, CurrencyType type) {
         CurrencyDto currencyDto = null;
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);
@@ -68,6 +73,7 @@ public class DefaultCurrencyService implements CurrencyService {
                 updateBaseType(currencyToUpdate);
                 currencyDto = CurrencyDto.from(currencyToUpdate);
             }
+            currencyCacheResolver.putToCache(List.of(currencyDto));
         }
         return currencyDto;
     }
@@ -83,6 +89,5 @@ public class DefaultCurrencyService implements CurrencyService {
         }
         currencyRepository.save(sourceCurrency);
     }
-
 
 }

@@ -39,24 +39,27 @@ public class CurrencyController {
 
     @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public CurrencyDto addCurrency(@RequestBody CurrencyDto currencyRequest) {
+    public ResponseEntity<?> addCurrency(@RequestBody CurrencyDto currencyRequest) {
         CurrencyType currencyType = getCurrencyType(currencyRequest);
         CurrencyDto currencyDto = currencyService.createCurrency(currencyRequest.getCode(), currencyType);
         if (currencyDto == null) {
-            return currencyRequest;
+            return new ResponseEntity<>("The currency with code " + currencyRequest.getCode() +
+                    " already exist", HttpStatus.BAD_REQUEST);
         }
-        return currencyDto;
+        return new ResponseEntity<>(currencyDto, HttpStatus.CREATED);
     }
 
     @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public CurrencyDto updateCurrency(@RequestBody CurrencyDto currencyRequest) {
+    public ResponseEntity<?> updateCurrency(@RequestBody CurrencyDto currencyRequest) {
         CurrencyType currencyType = getCurrencyType(currencyRequest);
         CurrencyDto currency = currencyService.updateCurrency(currencyRequest.getCode(), currencyType);
         if (currency == null) {
-            return currencyRequest;
+            return new ResponseEntity<>("The currency with code " + currencyRequest.getCode() +
+                    " and type " + currencyRequest.getType().toString() +
+                    " already present", HttpStatus.CONFLICT);
         }
-        return currency;
+        return new ResponseEntity<>(currency, HttpStatus.OK);
     }
 
     private CurrencyType getCurrencyType(CurrencyDto currencyRequest) {

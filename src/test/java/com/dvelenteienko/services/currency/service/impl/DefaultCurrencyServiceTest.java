@@ -1,5 +1,6 @@
 package com.dvelenteienko.services.currency.service.impl;
 
+import com.dvelenteienko.services.currency.config.CustomCacheResolverStub;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +23,8 @@ class DefaultCurrencyServiceTest {
 
     @Mock
     private CurrencyRepository currencyRepository;
+    @Mock
+    private CustomCacheResolverStub rateCacheResolver;
     @InjectMocks
     private DefaultCurrencyService testee;
 
@@ -37,7 +41,7 @@ class DefaultCurrencyServiceTest {
 
         testee.getCurrencyCodes(type);
 
-        verify(currencyRepository).getCodesByType(type);
+        verify(currencyRepository).findAll();
     }
 
     @Test

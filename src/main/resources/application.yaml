@@ -17,10 +17,15 @@ spring:
     change-log: classpath:/db/changelog/changelog-master.yaml
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
+  endpoint.health:
+    probes.enabled: true
+    show-details: always
+  endpoints.web:
+    base-path: /actuator
+    exposure.include: health,info,caches
+  health:
+    livenessstate.enabled: true
+    readinessstate.enabled: true
 
 service:
   currency:
@@ -31,11 +36,19 @@ service:
     base-currency-attr: base_currency
     currencies-attr: currencies
   cache:
+    default.enabled: false
+    caffeine:
+      enabled: true
+      initial-capacity: 200
+      maximum-size: 500
+      expiration-minutes: 10
     currency-name: currencies
     rate-name: rates
   scheduler:
     enabled: false
     cron: 0/30 * * ? * *
+
+
 
 logging.level:
   liquibase: INFO

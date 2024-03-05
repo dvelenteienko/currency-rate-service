@@ -1,5 +1,7 @@
 package com.dvelenteienko.services.currency.service.impl;
 
+import com.dvelenteienko.services.currency.config.CustomCacheResolver;
+import com.dvelenteienko.services.currency.config.CustomCacheResolverStub;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,6 +30,8 @@ class DefaultCurrencyRateServiceTest {
     private CurrencyExchangeDataService currencyExchangeDataService;
     @Mock
     private CurrencyRateRepository currencyRateRepository;
+    @Mock
+    private CustomCacheResolverStub currencyCacheResolver;
 
     @InjectMocks
     private DefaultCurrencyRateService testee;

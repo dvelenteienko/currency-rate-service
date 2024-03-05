@@ -98,7 +98,7 @@ class CurrencyControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(requestJson))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(responseJson));
     }
 
@@ -120,7 +120,7 @@ class CurrencyControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(requestJson))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(responseJson));
     }
 
@@ -132,15 +132,15 @@ class CurrencyControllerIT {
                 .build();
         when(currencyService.createCurrency("USD", CurrencyType.SOURCE)).thenReturn(null);
         String requestJson = objectMapper.writeValueAsString(requestCurrencyDto);
-        String responseJson = objectMapper.writeValueAsString(requestCurrencyDto);
+        String responseString = "The currency with code USD already exist";
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post(CURRENCY_REQUEST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(requestJson))
-                .andExpect(status().isOk())
-                .andExpect(content().json(responseJson));
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(responseString));
     }
 
     @Test
@@ -192,15 +192,15 @@ class CurrencyControllerIT {
                 .build();
         when(currencyService.updateCurrency("USD", CurrencyType.SOURCE)).thenReturn(null);
         String requestJson = objectMapper.writeValueAsString(requestCurrencyDto);
-        String responseJson = objectMapper.writeValueAsString(requestCurrencyDto);
+        String responseString = "The currency with code USD and type SOURCE already present";
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put(CURRENCY_REQUEST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(requestJson))
-                .andExpect(status().isOk())
-                .andExpect(content().json(responseJson));
+                .andExpect(status().isConflict())
+                .andExpect(content().string(responseString));
     }
 
 }
