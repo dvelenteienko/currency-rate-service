@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  app:
+    image: 'revor/base-currency-service:latest'
+    build:
+      context: ../docker
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/currency_database
+      - SPRING_DATASOURCE_USERNAME=currency
+      - SPRING_DATASOURCE_PASSWORD=currency
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+    ports:
+      - '8082:8082'
+
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./pgsql:/docker-entrypoint-initdb.d

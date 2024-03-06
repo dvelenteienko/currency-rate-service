@@ -38,4 +38,8 @@ public class CustomCacheResolver {
             return dtos;
         }
     }
+
+    private <T> List<T> findAndReplace(List<T> fromCache, List<T> dtos) {
+        return new ArrayList<>();
+    }
 }

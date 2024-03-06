@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: currency
+  template:
+    metadata:
+      labels:
+        app: currency
+    spec:
+      containers:
+        - name: app
+          image: revor/base-currency-service:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo:27017/dev
+          imagePullPolicy: Never
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: currency
+spec:
+  selector:
+    app: currency
+  ports:
+    - port: 80
+      targetPort: 8082
+  type: LoadBalancer

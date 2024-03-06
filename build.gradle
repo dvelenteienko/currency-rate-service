@@ -58,3 +58,15 @@ jacocoTestReport {
 		xml.required = true
 	}
 }
+
+task copyJarToDockerDir(type: Copy) {
+	from (layout.buildDirectory.dir(libsDirName)) {
+		exclude("**/*-plain.jar")
+	}
+	into layout.projectDirectory.dir("docker")
+}
+assemble.finalizedBy copyJarToDockerDir
+
+
+
+
