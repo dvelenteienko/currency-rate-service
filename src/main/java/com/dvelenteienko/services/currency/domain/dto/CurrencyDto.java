@@ -27,7 +27,7 @@ public class CurrencyDto {
                 .build();
     }
 
-    public static List<CurrencyDto> fromAll(List<Currency> currencies) {
+    public static List<CurrencyDto> from(List<Currency> currencies) {
         return currencies.stream()
                 .map(c -> new CurrencyDto(c.getCode(), c.getType()))
                 .toList();

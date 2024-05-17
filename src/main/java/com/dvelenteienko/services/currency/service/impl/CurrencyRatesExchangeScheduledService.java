@@ -24,15 +24,15 @@ public class CurrencyRatesExchangeScheduledService {
     @Scheduled(cron = "${service.scheduler.cron}")
     public void retrieveCurrencyExchangeRate() {
       log.info("Starting scheduler of retrieve currency rates");
-      String baseCode = currencyService.getCurrencyCodes(CurrencyType.BASE).stream()
-              .filter(StringUtils::isNotBlank)
-              .findFirst()
-              .orElse(null);
-      if (StringUtils.isNotBlank(baseCode)) {
-          Set<String> currencyCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
-          log.info("Prepare parameters. Base currency code: {}; Source codes: {}", baseCode, currencyCodes.size());
-          List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRate(baseCode, currencyCodes);
-          log.info("Currency rates successfully retrieved. Count: {}", currencyRateDtos.size());
-      }
+//      String baseCode = currencyService.getCurrencyCodes(CurrencyType.BASE).stream()
+//              .filter(StringUtils::isNotBlank)
+//              .findFirst()
+//              .orElse(null);
+//      if (StringUtils.isNotBlank(baseCode)) {
+//          Set<String> currencyCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
+//          log.info("Prepare parameters. Base currency code: {}; Source codes: {}", baseCode, currencyCodes.size());
+//          List<CurrencyRateDto> currencyRateDtos = currencyRateService.populateRate(baseCode, currencyCodes);
+//          log.info("Currency rates successfully retrieved. Count: {}", currencyRateDtos.size());
+//      }
     }
 }

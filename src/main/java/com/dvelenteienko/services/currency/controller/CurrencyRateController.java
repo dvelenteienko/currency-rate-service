@@ -50,18 +50,18 @@ public class CurrencyRateController {
         return responseEntity;
     }
 
-    @PostMapping(value = "/exchange/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> triggerCurrencyRatesExchange(@PathVariable String code) {
-        ResponseEntity<?> response;
-        Set<String> baseCurrencyCodes = currencyService.getCurrencyCodes(CurrencyType.BASE);
-        if (!baseCurrencyCodes.contains(code)) {
-            response = new ResponseEntity<>("The currency code " + code + " is not a BASE currency", HttpStatus.BAD_REQUEST);
-        } else {
-            Set<String> sourceCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
-            List<CurrencyRateDto> currencyRateDtos = currencyRateService.createCurrencyRate(code, sourceCodes);
-            response = new ResponseEntity<>(currencyRateDtos, HttpStatus.OK);
-        }
-
-        return response;
-    }
+//    @PostMapping(value = "/exchange/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<?> triggerCurrencyRatesExchange(@PathVariable String code) {
+//        ResponseEntity<?> response;
+//        Set<String> baseCurrencyCodes = currencyService.getCurrencyCodes(CurrencyType.BASE);
+//        if (!baseCurrencyCodes.contains(code)) {
+//            response = new ResponseEntity<>("The currency code " + code + " is not a BASE currency", HttpStatus.BAD_REQUEST);
+//        } else {
+//            Set<String> sourceCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
+//            List<CurrencyRateDto> currencyRateDtos = currencyRateService.populateRate(code, sourceCodes);
+//            response = new ResponseEntity<>(currencyRateDtos, HttpStatus.OK);
+//        }
+//
+//        return response;
+//    }
 }

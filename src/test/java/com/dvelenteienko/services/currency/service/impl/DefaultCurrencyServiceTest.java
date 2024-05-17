@@ -1,6 +1,5 @@
 package com.dvelenteienko.services.currency.service.impl;
 
-import com.dvelenteienko.services.currency.config.CustomCacheResolverStub;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;

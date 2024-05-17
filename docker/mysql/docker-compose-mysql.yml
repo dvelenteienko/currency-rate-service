@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: currency
+      MYSQL_USER: currency
+      MYSQL_PASSWORD: currency
+      MYSQL_ROOT_PASSWORD: currency
+    ports:
+      - '3306:3306'
+    volumes:
+      - db:/var/lib/mysql
+      - ./currency-init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  db:
+    driver: local

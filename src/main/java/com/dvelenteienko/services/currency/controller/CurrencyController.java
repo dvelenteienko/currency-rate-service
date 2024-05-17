@@ -23,18 +23,13 @@ public class CurrencyController {
     private final CurrencyService currencyService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCurrencies(@RequestParam(required = false) boolean showType) {
+    public ResponseEntity getCurrencies() {
         ResponseEntity<?> responseEntity;
         List<CurrencyDto> currencyDtos = currencyService.getCurrencies();
-        if (showType) {
-            responseEntity = new ResponseEntity<>(currencyDtos, HttpStatus.OK);
-        } else {
-            Set<String> codes = currencyDtos.stream()
-                    .map(CurrencyDto::getCode)
-                    .collect(Collectors.toSet());
-            responseEntity = new ResponseEntity<>(codes, HttpStatus.OK);
-        }
-        return responseEntity;
+        Set<String> codes = currencyDtos.stream()
+                .map(CurrencyDto::getCode)
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok(codes);
     }
 
     @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
@@ -49,18 +44,18 @@ public class CurrencyController {
         return new ResponseEntity<>(currencyDto, HttpStatus.CREATED);
     }
 
-    @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateCurrency(@RequestBody CurrencyDto currencyRequest) {
-        CurrencyType currencyType = getCurrencyType(currencyRequest);
-        CurrencyDto currency = currencyService.updateCurrency(currencyRequest.getCode(), currencyType);
-        if (currency == null) {
-            return new ResponseEntity<>("The currency with code " + currencyRequest.getCode() +
-                    " and type " + currencyRequest.getType().toString() +
-                    " already present", HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(currency, HttpStatus.OK);
-    }
+//    @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
+//    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<?> updateCurrency(@RequestBody CurrencyDto currencyRequest) {
+//        CurrencyType currencyType = getCurrencyType(currencyRequest);
+//        CurrencyDto currency = currencyService.updateCurrency(currencyRequest.getCode(), currencyType);
+//        if (currency == null) {
+//            return new ResponseEntity<>("The currency with code " + currencyRequest.getCode() +
+//                    " and type " + currencyRequest.getType().toString() +
+//                    " already present", HttpStatus.CONFLICT);
+//        }
+//        return new ResponseEntity<>(currency, HttpStatus.OK);
+//    }
 
     private CurrencyType getCurrencyType(CurrencyDto currencyRequest) {
         CurrencyType currencyType = currencyRequest.getType();

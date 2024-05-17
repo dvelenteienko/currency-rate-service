@@ -16,6 +16,7 @@ public interface CurrencyRepository extends JpaRepository<Currency, UUID> {
     Optional<Currency> findTopByType(CurrencyType type);
 
     List<Currency> findByType(CurrencyType type);
+    Long deleteByCode(String code);
 
     default Set<String> getCodesByType(CurrencyType type) {
         return findByType(type).stream()

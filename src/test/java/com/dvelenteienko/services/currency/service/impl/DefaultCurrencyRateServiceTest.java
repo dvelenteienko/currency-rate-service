@@ -1,6 +1,5 @@
 package com.dvelenteienko.services.currency.service.impl;
 
-import com.dvelenteienko.services.currency.config.CustomCacheResolverStub;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
@@ -80,7 +79,7 @@ class DefaultCurrencyRateServiceTest {
         List<CurrencyRate> currencyRates = CurrencyRateDto.fromDto(List.of(currencyRateDto));
         when(currencyExchangeDataService.getExchangeCurrencyRate(baseCode, codes)).thenReturn(List.of(currencyRateDto));
 
-        List<CurrencyRateDto> expected = testee.createCurrencyRate(baseCode, codes);
+        List<CurrencyRateDto> expected = testee.populateRate(baseCode, codes);
 
         assertThat(expected).isNotNull();
         assertThat(expected).hasSize(1);
@@ -103,7 +102,7 @@ class DefaultCurrencyRateServiceTest {
         List<CurrencyRate> currencyRates = CurrencyRateDto.fromDto(List.of(currencyRateDto));
         when(currencyExchangeDataService.getExchangeCurrencyRate(baseCode, codes)).thenReturn(List.of(currencyRateDto));
 
-        List<CurrencyRateDto> expected = testee.createCurrencyRate(baseCode, codesMethodParam);
+        List<CurrencyRateDto> expected = testee.populateRate(baseCode, codesMethodParam);
 
         assertThat(expected).isNotNull();
         assertThat(expected).hasSize(1);

@@ -1,5 +1,6 @@
 package com.dvelenteienko.services.currency.service.impl;
 
+import com.dvelenteienko.services.currency.config.CacheConfig;
 import com.dvelenteienko.services.currency.config.CurrencyClientApiConfigProperties;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyRateResponse;
@@ -7,6 +8,7 @@ import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +29,7 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
     private final RestTemplate restTemplate;
     private final CurrencyClientApiConfigProperties currencyClientApiConfigProperties;
 
+    @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "#baseCurrency")
     @Override
     public List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, Set<String> codes) {
         List<CurrencyRateDto> currencyRateDtos = new ArrayList<>();
