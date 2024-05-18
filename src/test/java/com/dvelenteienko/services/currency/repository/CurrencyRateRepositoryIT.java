@@ -34,7 +34,7 @@ class CurrencyRateRepositoryIT {
         LocalDateTime dateFrom = LocalDateTime.of(2021, 12, 11, 23, 59, 59);
         LocalDateTime dateTo = LocalDateTime.of(2021, 12, 11, 23, 59, 59);
 
-        List<CurrencyRate> currencyRates = testee.findAllByBaseAndDateBetweenOrderByDateDesc("USD", dateFrom, dateTo);
+        List<CurrencyRate> currencyRates = testee.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc("USD", dateFrom, dateTo);
 
         assertThat(currencyRates)
                 .hasSize(2)

@@ -9,6 +9,6 @@ import java.util.Set;
 public interface CurrencyRateService {
 
     List<CurrencyRateDto> getCurrencyRates(String baseCode, RequestPeriodDto requestPeriod);
-    List<CurrencyRateDto> populateRate(String baseCode, Set<String> codes);
+    List<CurrencyRateDto> fetchRates(String baseCode, Set<String> codes);
 
 }

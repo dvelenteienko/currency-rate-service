@@ -1,13 +1,17 @@
 package com.dvelenteienko.services.currency.service.impl;
 
+import com.dvelenteienko.services.currency.config.CacheConfig;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
 import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,21 +30,24 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
 //    private final CustomCacheResolver rateCacheResolver;
 
     @Override
+    @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "T(java.lang.String).format('%s-%s-%s', #baseCode, #requestPeriod.from, #requestPeriod.to)")
     public List<CurrencyRateDto> getCurrencyRates(String baseCode, RequestPeriodDto requestPeriod) {
-        List<CurrencyRate> currencyRates = currencyRateRepository.findAllByBaseAndDateBetweenOrderByDateDesc(baseCode,
+        List<CurrencyRate> currencyRates =
+                currencyRateRepository.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(Currency.builder().code(baseCode).build(),
                 requestPeriod.getFrom(), requestPeriod.getTo());
         log.info("Getting currency rates: {}", currencyRates.size());
         return CurrencyRateDto.toDto(currencyRates).stream().distinct().toList();
     }
 
     @Override
-    public List<CurrencyRateDto> populateRate(String baseCode, Set<String> codes) {
+    @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
+    public List<CurrencyRateDto> fetchRates(String baseCode, Set<String> codes) {
         if (codes.isEmpty()) {
             log.warn("No currency codes present!");
             throw new NoSuchElementException("Currency codes is empty");
         }
         List<CurrencyRateDto> currencyRateDtos = currencyExchangeDataService.getExchangeCurrencyRate(baseCode, codes);
-        currencyRateRepository.saveAllAndFlush(CurrencyRateDto.fromDto(currencyRateDtos));
+        currencyRateRepository.saveAll(CurrencyRateDto.fromDto(currencyRateDtos));
         return currencyRateDtos;
     }
 }

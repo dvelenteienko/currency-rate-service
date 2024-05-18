@@ -26,7 +26,7 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
     @ExceptionHandler(IllegalArgumentException.class)
     protected ResponseEntity<Object> handleCurrencyConflicts(IllegalArgumentException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .statusCode(HttpStatus.CONFLICT)
+                .statusCode(HttpStatus.BAD_REQUEST)
                 .message(ex.getMessage())
                 .requestedUrl(request.getRequestURI())
                 .build();

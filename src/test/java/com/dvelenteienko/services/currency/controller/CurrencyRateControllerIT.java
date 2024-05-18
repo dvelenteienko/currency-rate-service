@@ -110,7 +110,7 @@ class CurrencyRateControllerIT {
                 .setSource(SOURCE_CODE)
                 .build();
         List<CurrencyRateDto> response = List.of(currencyRateDto);
-        when(currencyRateService.populateRate(BASE_CODE, sourceCodes)).thenReturn(response);
+        when(currencyRateService.fetchRates(BASE_CODE, sourceCodes)).thenReturn(response);
         String responseJson = objectMapper.writeValueAsString(response);
 
         mockMvc.perform(MockMvcRequestBuilders

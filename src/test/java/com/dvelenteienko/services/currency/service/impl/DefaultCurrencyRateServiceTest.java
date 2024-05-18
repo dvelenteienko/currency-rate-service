@@ -42,7 +42,7 @@ class DefaultCurrencyRateServiceTest {
         CurrencyRate rate2 = new CurrencyRate(UUID.randomUUID(), "USD", "GPB", localDateTime, 0.2);
         CurrencyRate rate3 = new CurrencyRate(UUID.randomUUID(), "USD", "EUR", localDateTime, 0.1);
         List<CurrencyRate> rates = List.of(rate1, rate2, rate3);
-        when(currencyRateRepository.findAllByBaseAndDateBetweenOrderByDateDesc(baseCode, localDateTime, localDateTime))
+        when(currencyRateRepository.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(baseCode, localDateTime, localDateTime))
                 .thenReturn(rates);
 
         List<CurrencyRateDto> expected = testee.getCurrencyRates(baseCode, requestPeriodDto);
@@ -56,7 +56,7 @@ class DefaultCurrencyRateServiceTest {
         String baseCode = "EUR";
         final LocalDateTime localDateTime = LocalDateTime.of(2023, 3, 3, 3, 3);
         RequestPeriodDto requestPeriodDto = RequestPeriodDto.builder().setFrom(localDateTime).setTo(localDateTime).build();
-        when(currencyRateRepository.findAllByBaseAndDateBetweenOrderByDateDesc(baseCode, localDateTime, localDateTime))
+        when(currencyRateRepository.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(baseCode, localDateTime, localDateTime))
                 .thenReturn(Collections.emptyList());
 
         List<CurrencyRateDto> expected = testee.getCurrencyRates(baseCode, requestPeriodDto);
@@ -79,7 +79,7 @@ class DefaultCurrencyRateServiceTest {
         List<CurrencyRate> currencyRates = CurrencyRateDto.fromDto(List.of(currencyRateDto));
         when(currencyExchangeDataService.getExchangeCurrencyRate(baseCode, codes)).thenReturn(List.of(currencyRateDto));
 
-        List<CurrencyRateDto> expected = testee.populateRate(baseCode, codes);
+        List<CurrencyRateDto> expected = testee.fetchRates(baseCode, codes);
 
         assertThat(expected).isNotNull();
         assertThat(expected).hasSize(1);
@@ -102,7 +102,7 @@ class DefaultCurrencyRateServiceTest {
         List<CurrencyRate> currencyRates = CurrencyRateDto.fromDto(List.of(currencyRateDto));
         when(currencyExchangeDataService.getExchangeCurrencyRate(baseCode, codes)).thenReturn(List.of(currencyRateDto));
 
-        List<CurrencyRateDto> expected = testee.populateRate(baseCode, codesMethodParam);
+        List<CurrencyRateDto> expected = testee.fetchRates(baseCode, codesMethodParam);
 
         assertThat(expected).isNotNull();
         assertThat(expected).hasSize(1);

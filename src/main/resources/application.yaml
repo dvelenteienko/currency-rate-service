@@ -15,7 +15,7 @@ spring:
 
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.yaml
-    enabled: true
+    enabled: false
 #  cache:
 #    type: caffeine
 #    cache-names: currencies,rates
