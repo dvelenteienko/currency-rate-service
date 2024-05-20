@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface CurrencyRateRepository extends JpaRepository<CurrencyRate, UUID> {
 
     List<CurrencyRate> findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(Currency base, LocalDateTime from, LocalDateTime to);
+    List<CurrencyRate> findAllBySourceAndDateBetweenOrderByDateDesc(Currency source, LocalDateTime from, LocalDateTime to);
 
 //    Long deleteByBaseCode(String code);
 //    Long deleteAllByBase(List<String> codes);

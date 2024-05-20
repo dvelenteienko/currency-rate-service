@@ -5,6 +5,7 @@ import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
+import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
@@ -27,14 +28,20 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
 
     private final CurrencyExchangeDataService currencyExchangeDataService;
     private final CurrencyRateRepository currencyRateRepository;
-//    private final CustomCacheResolver rateCacheResolver;
 
     @Override
-    @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "T(java.lang.String).format('%s-%s-%s', #baseCode, #requestPeriod.from, #requestPeriod.to)")
-    public List<CurrencyRateDto> getCurrencyRates(String baseCode, RequestPeriodDto requestPeriod) {
-        List<CurrencyRate> currencyRates =
-                currencyRateRepository.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(Currency.builder().code(baseCode).build(),
-                requestPeriod.getFrom(), requestPeriod.getTo());
+    @Cacheable(value = CacheConfig.RATE_CACHE_NAME,
+            key = "T(java.lang.String).format('%s-%s-%s-%s', #type, #baseCode, #requestPeriod.from, #requestPeriod.to)")
+    public List<CurrencyRateDto> getCurrencyRates(String baseCode, RequestPeriodDto requestPeriod, CurrencyType type) {
+        List<CurrencyRate> currencyRates;
+        if(CurrencyType.BASE == type) {
+            currencyRates =
+                    currencyRateRepository.findAllByBaseCurrencyCodeAndDateBetweenOrderByDateDesc(Currency.builder()
+                                    .code(baseCode).build(), requestPeriod.getFrom(), requestPeriod.getTo());
+        } else {
+            currencyRates = currencyRateRepository.findAllBySourceAndDateBetweenOrderByDateDesc(Currency.builder()
+                    .code(baseCode).build(), requestPeriod.getFrom(), requestPeriod.getTo());
+        }
         log.info("Getting currency rates: {}", currencyRates.size());
         return CurrencyRateDto.toDto(currencyRates).stream().distinct().toList();
     }

@@ -22,7 +22,7 @@ public class CurrencyController {
     private final CurrencyService currencyService;
     private final CacheManager cacheManager;
 
-    @GetMapping(value = "/currencies", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getCurrencies() {
         return ResponseEntity.ok(currencyService.getCurrencies());
     }

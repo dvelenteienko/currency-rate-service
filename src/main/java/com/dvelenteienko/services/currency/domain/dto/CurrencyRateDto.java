@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -41,8 +42,13 @@ public class CurrencyRateDto {
 
     public static List<CurrencyRateDto> toDto(List<CurrencyRate> currencyRates) {
         return currencyRates.stream()
-                .map(cr -> new CurrencyRateDto(cr.getSource(), cr.getBaseCurrencyCode().getCode(), cr.getDate(), cr.getRate()))
-                .toList();
+                .map(cr -> CurrencyRateDto.builder()
+                        .setSource(cr.getSource())
+                        .setBase(cr.getBaseCurrencyCode().getCode())
+                        .setDate(cr.getDate())
+                        .setRate(cr.getRate())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 }

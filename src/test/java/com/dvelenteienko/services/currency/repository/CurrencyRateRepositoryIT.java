@@ -38,7 +38,7 @@ class CurrencyRateRepositoryIT {
 
         assertThat(currencyRates)
                 .hasSize(2)
-                .allMatch(p -> p.getDate().equals(dateFrom) && p.getBase().equals("USD"));
+                .allMatch(p -> p.getDate().equals(dateFrom) && p.getBaseCurrencyCode().equals("USD"));
     }
 
     @Test

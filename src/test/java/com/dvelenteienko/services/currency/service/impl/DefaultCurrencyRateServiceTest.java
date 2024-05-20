@@ -2,6 +2,7 @@ package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.CurrencyRate;
 import com.dvelenteienko.services.currency.repository.CurrencyRateRepository;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
@@ -27,8 +28,6 @@ class DefaultCurrencyRateServiceTest {
     private CurrencyExchangeDataService currencyExchangeDataService;
     @Mock
     private CurrencyRateRepository currencyRateRepository;
-    @Mock
-    private CustomCacheResolverStub currencyCacheResolver;
 
     @InjectMocks
     private DefaultCurrencyRateService testee;
@@ -38,7 +37,7 @@ class DefaultCurrencyRateServiceTest {
         String baseCode = "EUR";
         final LocalDateTime localDateTime = LocalDateTime.of(2023, 3, 3, 3, 3);
         RequestPeriodDto requestPeriodDto = RequestPeriodDto.builder().setFrom(localDateTime).setTo(localDateTime).build();
-        CurrencyRate rate1 = new CurrencyRate(UUID.randomUUID(), "USD", "EUR", localDateTime, 0.1);
+        CurrencyRate rate1 = new CurrencyRate(UUID.randomUUID(), "USD", Currency.builder().setCode("EUR").build(), localDateTime, 0.1);
         CurrencyRate rate2 = new CurrencyRate(UUID.randomUUID(), "USD", "GPB", localDateTime, 0.2);
         CurrencyRate rate3 = new CurrencyRate(UUID.randomUUID(), "USD", "EUR", localDateTime, 0.1);
         List<CurrencyRate> rates = List.of(rate1, rate2, rate3);

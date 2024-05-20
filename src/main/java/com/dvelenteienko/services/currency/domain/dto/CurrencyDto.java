@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -29,7 +30,10 @@ public class CurrencyDto {
 
     public static List<CurrencyDto> from(List<Currency> currencies) {
         return currencies.stream()
-                .map(c -> new CurrencyDto(c.getCode(), c.getType()))
-                .toList();
+                .map(c -> CurrencyDto.builder()
+                        .setCode(c.getCode())
+                        .setType(c.getType())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

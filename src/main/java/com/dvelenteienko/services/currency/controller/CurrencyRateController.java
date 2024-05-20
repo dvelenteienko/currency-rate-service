@@ -4,23 +4,29 @@ import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
+import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(Api.BASE_URL + "/rates")
+@RequestMapping(Api.BASE_URL + "/rate")
 public class CurrencyRateController {
 
     private final CurrencyRateService currencyRateService;
@@ -31,36 +37,34 @@ public class CurrencyRateController {
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
                                               @RequestParam String dateFrom,
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
-                                              @RequestParam String dateTo) {
+                                              @RequestParam String dateTo,
+                                              @RequestParam(required = false, defaultValue = "base") CurrencyType target) {
+        baseCurrencyCode = baseCurrencyCode.toUpperCase();
         final LocalDate from = LocalDate.parse(dateFrom);
         final LocalDate to = LocalDate.parse(dateTo);
 
-        RequestPeriodDto requestPeriodDto = RequestPeriodDto.builder()
-                .setFrom(from.atStartOfDay())
-                .setTo(to.atTime(LocalTime.MAX))
-                .build();
+        RequestPeriodDto requestPeriodDto = prepareRequestedPeriod(from, to);
         if (!requestPeriodDto.isValid()) {
             throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
         }
-        return ResponseEntity.ok(currencyRateService.getCurrencyRates(baseCurrencyCode, requestPeriodDto));
+        return ResponseEntity.ok(currencyRateService.getCurrencyRates(baseCurrencyCode, requestPeriodDto, target));
     }
 
     @GetMapping(value = "/fetch", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> fetchCurrencyRates(@RequestParam String baseCurrency,
                                                 @RequestParam List<String> currencies) {
 
-        LocalDate today = LocalDate.now();
-        RequestPeriodDto requestPeriod = RequestPeriodDto.builder()
-                .setFrom(today.atStartOfDay())
-                .setTo(today.atTime(LocalTime.MAX))
-                .build();
+        baseCurrency = baseCurrency.toUpperCase();
+        LocalDate prevDay = LocalDate.now().minusDays(1);
+        RequestPeriodDto requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
 
         List<String> existingCurrencies = currencyService.getCurrencies().stream()
                 .map(CurrencyDto::getCode)
                 .collect(Collectors.toList());
+        currencies.replaceAll(String::toUpperCase);
         currencies.retainAll(existingCurrencies);
 
-        List<CurrencyRateDto> rates = currencyRateService.getCurrencyRates(baseCurrency, requestPeriod);
+        List<CurrencyRateDto> rates = currencyRateService.getCurrencyRates(baseCurrency, requestPeriod, CurrencyType.BASE);
         boolean containsExisting = rates.stream()
                 .map(CurrencyRateDto::getSource)
                 .anyMatch(currencies::contains);
@@ -72,18 +76,16 @@ public class CurrencyRateController {
         return ResponseEntity.ok(featchedRates);
     }
 
-//    @PostMapping(value = "/exchange/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<?> triggerCurrencyRatesExchange(@PathVariable String code) {
-//        ResponseEntity<?> response;
-//        Set<String> baseCurrencyCodes = currencyService.getCurrencyCodes(CurrencyType.BASE);
-//        if (!baseCurrencyCodes.contains(code)) {
-//            response = new ResponseEntity<>("The currency code " + code + " is not a BASE currency", HttpStatus.BAD_REQUEST);
-//        } else {
-//            Set<String> sourceCodes = currencyService.getCurrencyCodes(CurrencyType.SOURCE);
-//            List<CurrencyRateDto> currencyRateDtos = currencyRateService.populateRate(code, sourceCodes);
-//            response = new ResponseEntity<>(currencyRateDtos, HttpStatus.OK);
-//        }
-//
-//        return response;
-//    }
+    private RequestPeriodDto prepareRequestedPeriod(LocalDate from, LocalDate to) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime endOfDay = to.atTime(LocalTime.MAX);
+        if (today.equals(to)) {
+            endOfDay = LocalDateTime.now();
+        }
+        return RequestPeriodDto.builder()
+                .setFrom(from.atStartOfDay())
+                .setTo(endOfDay)
+                .build();
+    }
+
 }
