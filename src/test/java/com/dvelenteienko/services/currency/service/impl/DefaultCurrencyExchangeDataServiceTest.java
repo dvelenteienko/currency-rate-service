@@ -50,7 +50,7 @@ class DefaultCurrencyExchangeDataServiceTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CurrencyRateResponse.class)))
                 .thenReturn(responseEntityMock);
 
-        List<CurrencyRateDto> expected = testee.getExchangeCurrencyRate(baseCurrency, Set.of(currencyCode));
+        List<CurrencyRateDto> expected = testee.getExchangeCurrencyRate(baseCurrency, List.of(currencyCode));
 
         assertThat(expected).isNotNull();
         assertThat(expected.get(0).getSource()).isEqualTo(currencyCode);

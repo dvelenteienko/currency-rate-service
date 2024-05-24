@@ -31,29 +31,34 @@ public class DefaultCurrencyService implements CurrencyService {
     }
 
     @Override
-    @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME)
+    public CurrencyDto getCurrencyByCode(String code) {
+        Currency currency = currencyRepository.getByCode(code);
+        if (currency != null) {
+            return CurrencyDto.from(currency);
+        }
+        return CurrencyDto.builder().build();
+    }
+
+    @Override
+    @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
     public CurrencyDto createCurrency(String code, CurrencyType type) {
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);
         if (currencyOpt.isPresent()) {
             throw new IllegalArgumentException(String.format("Currency '%s' already exists", code));
         }
         Currency currency = Currency.builder()
-                .code(code)
-                .type(type)
+                .setCode(code)
+                .setType(type)
                 .build();
         Currency saved = currencyRepository.save(currency);
         return CurrencyDto.from(saved);
     }
 
     @Override
-    @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME)
-    public void removeCurrency(String code) {
-        Optional<Currency> optionalCurrency = currencyRepository.findTopByCode(code);
-        if (optionalCurrency.isPresent()) {
-            Currency currency = optionalCurrency.get();
-            log.info(String.format("Removed '%s' currency ", currency.getCode()));
-            currencyRepository.delete(currency);
-        }
+    @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
+    public void removeCurrency(Currency currency) {
+        log.info(String.format("Removed [%s]", currency));
+        currencyRepository.delete(currency);
     }
 
 }

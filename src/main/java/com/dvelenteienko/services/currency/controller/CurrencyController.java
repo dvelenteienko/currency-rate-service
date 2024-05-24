@@ -2,11 +2,12 @@ package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
+import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import java.net.URISyntaxException;
 public class CurrencyController {
 
     private final CurrencyService currencyService;
-    private final CacheManager cacheManager;
+    private final CurrencyRateService currencyRateService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getCurrencies() {
@@ -36,7 +37,9 @@ public class CurrencyController {
 
     @DeleteMapping("/{code}")
     public ResponseEntity deleteCurrency(@PathVariable String code) {
-        currencyService.removeCurrency(code);
+        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(code));
+        currencyService.removeCurrency(currency);
+        currencyRateService.removeRatesBySource(currency.getCode());
         return ResponseEntity.ok().build();
     }
 

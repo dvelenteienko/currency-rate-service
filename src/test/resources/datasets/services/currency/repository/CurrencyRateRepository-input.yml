@@ -1,26 +1,40 @@
-rates:
+rate:
   - id: "286deb24-4a12-4676-abdd-416c9d8b4ab1"
-    source: "CAD"
-    base: "USD"
+    source_code: "CAD"
+    base_code: "USD"
     date: "2021-12-11 23:59:59.000"
     rate: 0.78
   - id: "286deb24-4a12-4676-abdd-416c9d8b4ab2"
-    source: "CAD"
-    base: "USD"
+    source_code: "CAD"
+    base_code: "USD"
     date: "2021-12-11 22:59:59.000"
     rate: 0.78
   - id: "2ac4c549-79c1-4c7c-9efa-fd44d1eaa049"
-    source: "EUR"
-    base: "USD"
+    source_code: "EUR"
+    base_code: "USD"
     date: "2021-12-11 23:59:59.000"
     rate: 1.77
   - id: "9ba71bd5-2f31-4878-a7f1-2c72fc7b0527"
-    source: "GBP"
-    base: "USD"
+    source_code: "GBP"
+    base_code: "USD"
     date: "2021-12-12 23:59:59.000"
     rate: 2.73
   - id: "9ba71bd5-2f31-3333-a7f1-2c72fc7b0527"
-    source: "USD"
-    base: "EUR"
+    source_code: "USD"
+    base_code: "EUR"
     date: "2021-12-12 23:59:59.000"
     rate: 1.73
+
+currency:
+  - id: "00000001-0000-0000-0000-000000000001"
+    code: "USD"
+    type: "BASE"
+  - id: "67f649da-07f5-4bbe-97f8-301b718082de"
+    code: "CAD"
+    type: "BASE"
+  - id: "5d867a1b-74fc-4b1e-ab96-643fa9fca8ad"
+    code: "EUR"
+    type: "BASE"
+  - id: "82e4475b-fd6c-42dc-9fb5-359fbe3fd69b"
+    code: "GBP"
+    type: "BASE"

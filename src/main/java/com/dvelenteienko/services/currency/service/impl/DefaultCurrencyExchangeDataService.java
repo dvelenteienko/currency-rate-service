@@ -19,7 +19,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,19 +31,24 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
 
     @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "#baseCurrency")
     @Override
-    public List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, Set<String> codes) {
+    public List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, List<String> codes) {
         List<CurrencyRateDto> currencyRateDtos = new ArrayList<>();
         if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
             CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
             final LocalDateTime lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
             currencyRateDtos = response.data().values().stream()
-                    .map(currencyData -> new CurrencyRateDto(currencyData.code(), baseCurrency, lastUpdatedAt, currencyData.value()))
-                    .toList();
+                    .map(currencyData -> CurrencyRateDto.builder()
+                            .setSource(currencyData.code())
+                            .setBase(baseCurrency)
+                            .setDate(lastUpdatedAt)
+                            .setRate(currencyData.value())
+                            .build())
+                    .collect(Collectors.toList());
         }
         return currencyRateDtos;
     }
 
-    private CurrencyRateResponse callCurrencyRateApi(String baseCurrency, Set<String> currencies) {
+    private CurrencyRateResponse callCurrencyRateApi(String baseCurrency, List<String> currencies) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.add("Connection", "keep-alive");

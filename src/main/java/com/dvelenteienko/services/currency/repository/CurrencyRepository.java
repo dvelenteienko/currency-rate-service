@@ -13,11 +13,10 @@ import java.util.stream.Collectors;
 public interface CurrencyRepository extends JpaRepository<Currency, UUID> {
 
     Optional<Currency> findTopByCode(String code);
+    Currency getByCode(String code);
     Optional<Currency> findTopByType(CurrencyType type);
 
     List<Currency> findByType(CurrencyType type);
-    Long deleteByCode(String code);
-    Currency findByCode(String code);
 
     default Set<String> getCodesByType(CurrencyType type) {
         return findByType(type).stream()

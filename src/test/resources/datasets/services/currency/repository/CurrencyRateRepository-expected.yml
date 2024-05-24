@@ -1,11 +1,18 @@
-rates:
+rate:
   - id: "9ba71bd5-2f31-1313-a7f1-2c72fc7b0527"
     source: "CAD"
     base: "EUR"
     date: "2021-12-13 23:59:59.000"
     rate: 3.2332
-  - id: "286deb24-4a12-4676-abdd-416c9d8b4ab1"
-    source: "CAD"
-    base: "USD"
-    date: "2021-12-11 23:59:59.000"
-    rate: 0.78
+#  - id: "286deb24-4a12-4676-abdd-416c9d8b4ab1"
+#    source_code: "CAD"
+#    base_code: "USD"
+#    date: "2021-12-11 23:59:59.000"
+#    rate: 0.78
+currency:
+  - id: "00000001-0000-0000-0000-000000000001"
+    code: "USD"
+    type: "BASE"
+  - id: "2f99e193-7056-4d19-97f9-ba8335ae8be9"
+    code: "CAD"
+    type: "BASE"

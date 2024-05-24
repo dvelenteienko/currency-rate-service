@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CurrencyRateResponseTest {
+class RateResponseTest {
 
     @Test
     public void deserialize_WhenJsonReceived_ThenValuesMappedCorrectly() throws JsonProcessingException {

@@ -4,6 +4,7 @@ import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
 import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
@@ -20,7 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,47 +33,59 @@ public class CurrencyRateController {
     private final CurrencyService currencyService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCurrencyRates(@RequestParam String baseCurrencyCode,
+    public ResponseEntity<?> getCurrencyRates(@RequestParam String code,
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
                                               @RequestParam String dateFrom,
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
                                               @RequestParam String dateTo,
-                                              @RequestParam(required = false, defaultValue = "base") CurrencyType target) {
-        baseCurrencyCode = baseCurrencyCode.toUpperCase();
+                                              @RequestParam(defaultValue = "BASE") CurrencyType target) {
+        String targetCode = code.toUpperCase();
         final LocalDate from = LocalDate.parse(dateFrom);
         final LocalDate to = LocalDate.parse(dateTo);
+        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(targetCode));
 
         RequestPeriodDto requestPeriodDto = prepareRequestedPeriod(from, to);
         if (!requestPeriodDto.isValid()) {
             throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
         }
-        return ResponseEntity.ok(currencyRateService.getCurrencyRates(baseCurrencyCode, requestPeriodDto, target));
+        return ResponseEntity.ok(currencyRateService.getCurrencyRates(currency, requestPeriodDto, target));
     }
 
-    @GetMapping(value = "/fetch", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> fetchCurrencyRates(@RequestParam String baseCurrency,
-                                                @RequestParam List<String> currencies) {
+    @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> exchangeCurrencyRates(@RequestParam String code,
+                                                   @RequestParam List<String> currencies) {
 
-        baseCurrency = baseCurrency.toUpperCase();
+        String targetCode = code.toUpperCase();
+        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(code));
+
         LocalDate prevDay = LocalDate.now().minusDays(1);
         RequestPeriodDto requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
+        List<String> normalizedCurrencies = normalizeCurrencies(currencies);
+        boolean containsExisting = isContainsExistingRates(currency, requestPeriod, normalizedCurrencies);
 
+        if (containsExisting) {
+            throw new IllegalArgumentException(
+                    String.format("The following currency rates [%s] of base currency code [%s] already exists",
+                            String.join(",", normalizedCurrencies), targetCode));
+        }
+        return ResponseEntity.ok(currencyRateService.fetchRates(currency, normalizedCurrencies));
+    }
+
+    private boolean isContainsExistingRates(Currency currency, RequestPeriodDto requestPeriod, List<String> normalizedCurrencies) {
+        List<CurrencyRateDto> rates = currencyRateService.getCurrencyRates(currency, requestPeriod, CurrencyType.BASE);
+        return !rates.isEmpty() && rates.stream()
+                .map(CurrencyRateDto::getSource)
+                .allMatch(normalizedCurrencies::contains);
+    }
+
+    private List<String> normalizeCurrencies(List<String> currencyList) {
+        List<String> currencies = new ArrayList<>(currencyList);
         List<String> existingCurrencies = currencyService.getCurrencies().stream()
                 .map(CurrencyDto::getCode)
                 .collect(Collectors.toList());
         currencies.replaceAll(String::toUpperCase);
         currencies.retainAll(existingCurrencies);
-
-        List<CurrencyRateDto> rates = currencyRateService.getCurrencyRates(baseCurrency, requestPeriod, CurrencyType.BASE);
-        boolean containsExisting = rates.stream()
-                .map(CurrencyRateDto::getSource)
-                .anyMatch(currencies::contains);
-
-        List<CurrencyRateDto> featchedRates = new ArrayList<>();
-        if (!containsExisting) {
-            featchedRates = currencyRateService.fetchRates(baseCurrency, new HashSet<>(currencies));
-        }
-        return ResponseEntity.ok(featchedRates);
+        return currencies;
     }
 
     private RequestPeriodDto prepareRequestedPeriod(LocalDate from, LocalDate to) {

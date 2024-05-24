@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,8 +22,6 @@ class DefaultCurrencyServiceTest {
 
     @Mock
     private CurrencyRepository currencyRepository;
-    @Mock
-    private CustomCacheResolverStub rateCacheResolver;
     @InjectMocks
     private DefaultCurrencyService testee;
 
@@ -37,7 +36,7 @@ class DefaultCurrencyServiceTest {
     public void getCurrencyCodes_WhenCalled_ThenReturnCodesByType() {
         CurrencyType type = CurrencyType.BASE;
 
-        testee.getCurrencyCodes(type);
+        testee.getCurrencies();
 
         verify(currencyRepository).findAll();
     }
@@ -80,62 +79,12 @@ class DefaultCurrencyServiceTest {
         String code = "USD";
         CurrencyType type = CurrencyType.BASE;
         UUID uuidMock = mock(UUID.class);
-        Currency currency = new Currency(uuidMock, code, type);
+        Currency currency = new Currency(uuidMock, code, type, List.of());
         when(currencyRepository.findTopByCode(code)).thenReturn(Optional.of(currency));
 
         CurrencyDto expected = testee.createCurrency(code, type);
 
         assertThat(expected).isNull();
-        verifyNoMoreInteractions(currencyRepository);
-    }
-
-    @Test
-    public void updateCurrency_WhenCalledWithExistingCodeAndBaseType_ThenUpdateBaseType() {
-        String code = "USD";
-        CurrencyType type = CurrencyType.BASE;
-        UUID uuidMock = mock(UUID.class);
-        Currency currencyWas = new Currency(uuidMock, code, CurrencyType.SOURCE);
-        Currency currencyToUpdate = new Currency(uuidMock, code, CurrencyType.BASE);
-        when(currencyRepository.findTopByCode(code)).thenReturn(Optional.of(currencyWas));
-        when(currencyRepository.findTopByType(CurrencyType.BASE)).thenReturn(Optional.of(currencyToUpdate));
-
-        CurrencyDto expected = testee.updateCurrency(code, type);
-
-        assertThat(expected.getCode()).isEqualTo(code);
-        assertThat(expected.getType()).isEqualTo(type);
-
-        verify(currencyRepository, times(2)).save(any(Currency.class));
-    }
-
-    @Test
-    public void updateCurrency_WhenCalledWithExistingCodeAndWrongBaseType_ThenBaseTypeHasNoUpdate() {
-        String code = "USD";
-        CurrencyType type = CurrencyType.SOURCE;
-        UUID uuidMock = mock(UUID.class);
-        Currency currencyWas = new Currency(uuidMock, code, CurrencyType.BASE);
-        when(currencyRepository.findTopByCode(code)).thenReturn(Optional.of(currencyWas));
-
-        CurrencyDto expected = testee.updateCurrency(code, type);
-
-        assertThat(expected.getCode()).isEqualTo(code);
-        assertThat(expected.getType()).isEqualTo(CurrencyType.BASE);
-
-        verifyNoMoreInteractions(currencyRepository);
-    }
-
-    @Test
-    public void updateCurrency_WhenCalledWithExistingCodeAndBaseType_ThenReturnExisting() {
-        String code = "USD";
-        CurrencyType type = CurrencyType.BASE;
-        UUID uuidMock = mock(UUID.class);
-        Currency currencyWas = new Currency(uuidMock, code, CurrencyType.BASE);
-        when(currencyRepository.findTopByCode(code)).thenReturn(Optional.of(currencyWas));
-
-        CurrencyDto expected = testee.updateCurrency(code, type);
-
-        assertThat(expected.getCode()).isEqualTo(code);
-        assertThat(expected.getType()).isEqualTo(type);
-
         verifyNoMoreInteractions(currencyRepository);
     }
 

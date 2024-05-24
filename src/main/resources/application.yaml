@@ -8,6 +8,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate.ddl-auto: validate
     open-in-view: false
+    show-sql: true
   datasource:
     url: jdbc:postgresql://localhost:5432/currency_database
     username: currency
@@ -15,7 +16,7 @@ spring:
 
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.yaml
-    enabled: false
+    enabled: true
 #  cache:
 #    type: caffeine
 #    cache-names: currencies,rates

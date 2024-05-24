@@ -2,18 +2,18 @@ package com.dvelenteienko.services.currency.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "rate_rel")
-@Builder
-@EqualsAndHashCode(of = "id")
+@Table(name = "rate")
+@SuperBuilder(setterPrefix = "set")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CurrencyRate {
+public class Rate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

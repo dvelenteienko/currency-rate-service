@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.shaded.org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class CurrencyRepositoryIT {
     @DataSet(cleanBefore = true, value = "services/currency/repository/CurrencyRepository-save-input.yml")
     void currencyRepository_WhenSave_ThenReturnCurrency() {
 
-        Currency currency = testee.save(new Currency(null, "AUD", CurrencyType.SOURCE));
+        Currency currency = testee.save(new Currency(null, "AUD", CurrencyType.SOURCE, List.of()));
 
         assertThat(currency.getCode()).isEqualTo("AUD");
         assertThat(currency.getType()).isEqualTo(CurrencyType.SOURCE);
