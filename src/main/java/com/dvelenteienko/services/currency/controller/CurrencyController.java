@@ -1,9 +1,9 @@
 package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
-import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
+import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,19 +25,20 @@ public class CurrencyController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getCurrencies() {
-        return ResponseEntity.ok(currencyService.getCurrencies());
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.currenciesToCurrencyDtos(currencyService.getCurrencies()));
     }
 
     @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity addCurrency(@RequestBody CurrencyDto currencyRequest) throws URISyntaxException {
-        CurrencyDto currencyDto = currencyService.createCurrency(currencyRequest.getCode(), CurrencyType.BASE);
-        return ResponseEntity.created(new URI(Api.BASE_URL + "/currencies")).body(currencyDto);
+    public ResponseEntity addCurrency(@RequestBody CurrencyDTO currencyRequest) throws URISyntaxException {
+        Currency currency = currencyService.createCurrency(currencyRequest.getCode());
+        return ResponseEntity.created(new URI(Api.BASE_URL + "/currencies"))
+                .body(CurrencyMapper.INSTANCE.currencyToCurrencyDTO(currency));
     }
 
     @DeleteMapping("/{code}")
     public ResponseEntity deleteCurrency(@PathVariable String code) {
-        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(code));
+        Currency currency = currencyService.getCurrencyByCode(code);
         currencyService.removeCurrency(currency);
         currencyRateService.removeRatesBySource(currency.getCode());
         return ResponseEntity.ok().build();

@@ -9,24 +9,28 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "rate")
-@SuperBuilder(setterPrefix = "set")
+@Builder(setterPrefix = "set")
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class Rate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @Column(name = "source_code", nullable = false)
-    private String source;
 
-    @ManyToOne
-    @JoinColumn(name = "base_code", referencedColumnName = "code", nullable = false)
-    private Currency baseCurrencyCode;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "base_currency_id")
+    private Currency base;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "source_currency_id")
+    private Currency source;
 
     @Column(nullable = false)
     private LocalDateTime date;
+
     @Column(nullable = false, scale = 10)
     private Double rate;
 }

@@ -4,6 +4,5 @@
 CREATE TABLE currency
 (
     id   UUID PRIMARY KEY,
-    code VARCHAR(255) NOT NULL unique,
-    type VARCHAR(255) NOT NULL
+    code VARCHAR(3) NOT NULL unique
 );

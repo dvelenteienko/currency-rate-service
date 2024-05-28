@@ -1,15 +1,14 @@
 package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.config.CacheConfig;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
-import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.repository.CurrencyRepository;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,36 +25,37 @@ public class DefaultCurrencyService implements CurrencyService {
 
     @Override
     @Cacheable(value = CacheConfig.CURRENCY_CACHE_NAME)
-    public List<CurrencyDto> getCurrencies() {
-        return CurrencyDto.from(currencyRepository.findAll());
+    public List<Currency> getCurrencies() {
+        return currencyRepository.findAll();
     }
 
     @Override
-    public CurrencyDto getCurrencyByCode(String code) {
+    public Currency getCurrencyByCode(String code) {
         Currency currency = currencyRepository.getByCode(code);
         if (currency != null) {
-            return CurrencyDto.from(currency);
+            return currency;
         }
-        return CurrencyDto.builder().build();
+        return Currency.builder().build();
     }
 
     @Override
     @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
-    public CurrencyDto createCurrency(String code, CurrencyType type) {
+    public Currency createCurrency(String code) {
         Optional<Currency> currencyOpt = currencyRepository.findTopByCode(code);
         if (currencyOpt.isPresent()) {
             throw new IllegalArgumentException(String.format("Currency '%s' already exists", code));
         }
         Currency currency = Currency.builder()
                 .setCode(code)
-                .setType(type)
                 .build();
-        Currency saved = currencyRepository.save(currency);
-        return CurrencyDto.from(saved);
+        return currencyRepository.save(currency);
     }
 
     @Override
-    @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true),
+            @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
+    })
     public void removeCurrency(Currency currency) {
         log.info(String.format("Removed [%s]", currency));
         currencyRepository.delete(currency);

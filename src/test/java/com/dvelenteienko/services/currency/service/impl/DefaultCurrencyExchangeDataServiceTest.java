@@ -1,7 +1,7 @@
 package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.config.CurrencyClientApiConfigProperties;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDTO;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyData;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyRateResponse;
 import com.dvelenteienko.services.currency.domain.entity.payload.Meta;
@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -50,7 +49,7 @@ class DefaultCurrencyExchangeDataServiceTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(CurrencyRateResponse.class)))
                 .thenReturn(responseEntityMock);
 
-        List<CurrencyRateDto> expected = testee.getExchangeCurrencyRate(baseCurrency, List.of(currencyCode));
+        List<CurrencyRateDTO> expected = testee.getExchangeCurrencyRate(baseCurrency, List.of(currencyCode));
 
         assertThat(expected).isNotNull();
         assertThat(expected.get(0).getSource()).isEqualTo(currencyCode);

@@ -2,12 +2,11 @@ package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.domain.entity.payload.ErrorResponse;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +42,13 @@ class CurrencyControllerIT {
 
     @Test
     public void getCurrencies_WhenRequested_ThenCurrencyReturnHttpStatusOk() throws Exception {
-        CurrencyDto currencyDtoUSDBase = CurrencyDto.builder()
+        CurrencyDTO currencyDTOUSDBase = CurrencyDTO.builder()
                 .setCode("USD")
                 .build();
-        CurrencyDto currencyDtoEURSource = CurrencyDto.builder()
+        CurrencyDTO currencyDTOEURSource = CurrencyDTO.builder()
                 .setCode("EUR")
                 .build();
-        List<CurrencyDto> response = List.of(currencyDtoUSDBase, currencyDtoEURSource);
+        List<CurrencyDTO> response = List.of(currencyDTOUSDBase, currencyDTOEURSource);
         when(currencyService.getCurrencies()).thenReturn(response);
         String responseJson = objectMapper.writeValueAsString(response);
 
@@ -63,7 +62,7 @@ class CurrencyControllerIT {
 
     @Test
     public void addCurrency_WhenRequestedCurrencyExist_ThenHandleException() throws Exception {
-        CurrencyDto requestCurrencyDto = CurrencyDto.builder()
+        CurrencyDTO requestCurrencyDTO = CurrencyDTO.builder()
                 .setCode("USD")
                 .build();
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -73,7 +72,7 @@ class CurrencyControllerIT {
                 .build();
         when(currencyService.createCurrency("USD", CurrencyType.BASE))
                 .thenThrow(new IllegalArgumentException("Currency already exists"));
-        String requestJson = objectMapper.writeValueAsString(requestCurrencyDto);
+        String requestJson = objectMapper.writeValueAsString(requestCurrencyDTO);
         String responseString = objectMapper.writeValueAsString(errorResponse);
 
         mockMvc.perform(MockMvcRequestBuilders

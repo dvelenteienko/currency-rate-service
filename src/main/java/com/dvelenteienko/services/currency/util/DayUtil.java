@@ -1,4 +1,4 @@
-package com.dvelenteienko.services.currency;
+package com.dvelenteienko.services.currency.util;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

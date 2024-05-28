@@ -1,13 +1,12 @@
 package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
-import com.dvelenteienko.services.currency.domain.dto.RequestPeriodDto;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
-import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
+import com.dvelenteienko.services.currency.domain.entity.Rate;
+import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
+import com.dvelenteienko.services.currency.util.RequestPeriod;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -32,23 +31,42 @@ public class CurrencyRateController {
     private final CurrencyRateService currencyRateService;
     private final CurrencyService currencyService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCurrencyRates(@RequestParam String code,
-                                              @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
-                                              @RequestParam String dateFrom,
-                                              @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
-                                              @RequestParam String dateTo,
-                                              @RequestParam(defaultValue = "BASE") CurrencyType target) {
+    @GetMapping(value = "base", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getCurrencyRatesByBase(@RequestParam String code,
+                                                    @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
+                                                    @RequestParam String dateFrom,
+                                                    @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
+                                                    @RequestParam String dateTo) {
         String targetCode = code.toUpperCase();
         final LocalDate from = LocalDate.parse(dateFrom);
         final LocalDate to = LocalDate.parse(dateTo);
-        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(targetCode));
+        Currency currency = currencyService.getCurrencyByCode(targetCode);
 
-        RequestPeriodDto requestPeriodDto = prepareRequestedPeriod(from, to);
-        if (!requestPeriodDto.isValid()) {
+        RequestPeriod requestPeriod = prepareRequestedPeriod(from, to);
+        if (!requestPeriod.isValid()) {
             throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
         }
-        return ResponseEntity.ok(currencyRateService.getCurrencyRates(currency, requestPeriodDto, target));
+        List<Rate> rates = currencyRateService.getCurrencyRatesByBase(currency, requestPeriod);
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
+    }
+
+    @GetMapping(value = "/source", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getCurrencyRatesBySource(@RequestParam String code,
+                                                      @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
+                                                      @RequestParam String dateFrom,
+                                                      @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
+                                                      @RequestParam String dateTo) {
+        String targetCode = code.toUpperCase();
+        final LocalDate from = LocalDate.parse(dateFrom);
+        final LocalDate to = LocalDate.parse(dateTo);
+        Currency currency = currencyService.getCurrencyByCode(targetCode);
+
+        RequestPeriod requestPeriod = prepareRequestedPeriod(from, to);
+        if (!requestPeriod.isValid()) {
+            throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
+        }
+        List<Rate> rates = currencyRateService.getCurrencyRatesBySource(currency, requestPeriod);
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -56,45 +74,46 @@ public class CurrencyRateController {
                                                    @RequestParam List<String> currencies) {
 
         String targetCode = code.toUpperCase();
-        Currency currency = CurrencyDto.from(currencyService.getCurrencyByCode(code));
+        Currency currency = currencyService.getCurrencyByCode(code);
 
         LocalDate prevDay = LocalDate.now().minusDays(1);
-        RequestPeriodDto requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
+        RequestPeriod requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
         List<String> normalizedCurrencies = normalizeCurrencies(currencies);
-        boolean containsExisting = isContainsExistingRates(currency, requestPeriod, normalizedCurrencies);
+        boolean containsExisting = isContainsExistingRates(requestPeriod, normalizedCurrencies);
 
         if (containsExisting) {
             throw new IllegalArgumentException(
                     String.format("The following currency rates [%s] of base currency code [%s] already exists",
                             String.join(",", normalizedCurrencies), targetCode));
         }
-        return ResponseEntity.ok(currencyRateService.fetchRates(currency, normalizedCurrencies));
+        List<Rate> rates = currencyRateService.fetchRates(currency, normalizedCurrencies);
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
     }
 
-    private boolean isContainsExistingRates(Currency currency, RequestPeriodDto requestPeriod, List<String> normalizedCurrencies) {
-        List<CurrencyRateDto> rates = currencyRateService.getCurrencyRates(currency, requestPeriod, CurrencyType.BASE);
+    private boolean isContainsExistingRates(RequestPeriod requestPeriod, List<String> normalizedCurrencies) {
+        List<Rate> rates = currencyRateService.getCurrencyRatesByPeriod(requestPeriod);
         return !rates.isEmpty() && rates.stream()
-                .map(CurrencyRateDto::getSource)
+                .map(rdto -> rdto.getSource().getCode())
                 .allMatch(normalizedCurrencies::contains);
     }
 
     private List<String> normalizeCurrencies(List<String> currencyList) {
         List<String> currencies = new ArrayList<>(currencyList);
         List<String> existingCurrencies = currencyService.getCurrencies().stream()
-                .map(CurrencyDto::getCode)
+                .map(Currency::getCode)
                 .collect(Collectors.toList());
         currencies.replaceAll(String::toUpperCase);
         currencies.retainAll(existingCurrencies);
         return currencies;
     }
 
-    private RequestPeriodDto prepareRequestedPeriod(LocalDate from, LocalDate to) {
+    private RequestPeriod prepareRequestedPeriod(LocalDate from, LocalDate to) {
         LocalDate today = LocalDate.now();
         LocalDateTime endOfDay = to.atTime(LocalTime.MAX);
         if (today.equals(to)) {
             endOfDay = LocalDateTime.now();
         }
-        return RequestPeriodDto.builder()
+        return RequestPeriod.builder()
                 .setFrom(from.atStartOfDay())
                 .setTo(endOfDay)
                 .build();

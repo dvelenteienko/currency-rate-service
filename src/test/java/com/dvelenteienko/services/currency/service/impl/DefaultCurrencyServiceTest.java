@@ -1,6 +1,6 @@
 package com.dvelenteienko.services.currency.service.impl;
 
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDto;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
 import com.dvelenteienko.services.currency.repository.CurrencyRepository;
@@ -52,7 +52,7 @@ class DefaultCurrencyServiceTest {
         when(currencyMock.getId()).thenReturn(uuidMock);
         when(currencyMock.getCode()).thenReturn(code);
 
-        CurrencyDto expected = testee.createCurrency(code, type);
+        CurrencyDTO expected = testee.createCurrency(code, type);
 
         assertThat(expected.getCode()).isEqualTo(code);
         assertThat(expected.getType()).isEqualTo(type);
@@ -66,7 +66,7 @@ class DefaultCurrencyServiceTest {
         CurrencyType type = CurrencyType.BASE;
         when(currencyRepository.findTopByCode(code)).thenReturn(Optional.empty());
 
-        CurrencyDto expected = testee.createCurrency(code, type);
+        CurrencyDTO expected = testee.createCurrency(code, type);
 
         assertThat(expected.getCode()).isEqualTo(code);
         assertThat(expected.getType()).isEqualTo(type);
@@ -82,7 +82,7 @@ class DefaultCurrencyServiceTest {
         Currency currency = new Currency(uuidMock, code, type, List.of());
         when(currencyRepository.findTopByCode(code)).thenReturn(Optional.of(currency));
 
-        CurrencyDto expected = testee.createCurrency(code, type);
+        CurrencyDTO expected = testee.createCurrency(code, type);
 
         assertThat(expected).isNull();
         verifyNoMoreInteractions(currencyRepository);

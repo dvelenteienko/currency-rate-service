@@ -2,7 +2,9 @@ package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.config.CacheConfig;
 import com.dvelenteienko.services.currency.config.CurrencyClientApiConfigProperties;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDto;
+import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDTO;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
+import com.dvelenteienko.services.currency.domain.entity.Rate;
 import com.dvelenteienko.services.currency.domain.entity.payload.CurrencyRateResponse;
 import com.dvelenteienko.services.currency.service.CurrencyExchangeDataService;
 import lombok.AllArgsConstructor;
@@ -31,21 +33,21 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
 
     @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "#baseCurrency")
     @Override
-    public List<CurrencyRateDto> getExchangeCurrencyRate(String baseCurrency, List<String> codes) {
-        List<CurrencyRateDto> currencyRateDtos = new ArrayList<>();
+    public List<Rate> getExchangeCurrencyRate(String baseCurrency, List<String> codes) {
+        List<Rate> rates = new ArrayList<>();
         if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
             CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
             final LocalDateTime lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
-            currencyRateDtos = response.data().values().stream()
-                    .map(currencyData -> CurrencyRateDto.builder()
-                            .setSource(currencyData.code())
-                            .setBase(baseCurrency)
+            rates = response.data().values().stream()
+                    .map(currencyData -> Rate.builder()
+                            .setSource(Currency.builder().setCode(currencyData.code()).build())
+                            .setBase(Currency.builder().setCode(baseCurrency).build())
                             .setDate(lastUpdatedAt)
                             .setRate(currencyData.value())
                             .build())
                     .collect(Collectors.toList());
         }
-        return currencyRateDtos;
+        return rates;
     }
 
     private CurrencyRateResponse callCurrencyRateApi(String baseCurrency, List<String> currencies) {

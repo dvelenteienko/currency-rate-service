@@ -1,4 +1,4 @@
-package com.dvelenteienko.services.currency.domain.dto;
+package com.dvelenteienko.services.currency.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @SuperBuilder(setterPrefix = "set")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RequestPeriodDto {
+public class RequestPeriod {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime from;

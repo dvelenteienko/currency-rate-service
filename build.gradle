@@ -38,9 +38,11 @@ dependencies {
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.0.4'
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'mysql:mysql-connector-java:8.0.33'
-	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+	compileOnly 'org.projectlombok:lombok:1.18.20'
 	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.github.database-rider:rider-junit5:1.41.0'
 	testImplementation('io.zonky.test:embedded-database-spring-test:2.4.0') {
