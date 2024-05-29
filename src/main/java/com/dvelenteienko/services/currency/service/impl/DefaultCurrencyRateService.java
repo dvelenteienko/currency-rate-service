@@ -1,7 +1,6 @@
 package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.config.CacheConfig;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDTO;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.Rate;
 import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
@@ -12,6 +11,8 @@ import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.util.RequestPeriod;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.util.function.Function.identity;
 
 @Slf4j
 @Service
@@ -35,58 +37,32 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
 
     @Override
     @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
-    public List<Rate> fetchRates(Currency currency, List<String> codes) {
-        if (codes.isEmpty() || currency == null) {
-            log.warn("No currency codes present or currencies is not in allowed list");
-            throw new NoSuchElementException("Currency codes is empty or currency is not allowed list. " +
-                    "Try to GET currencies to see allowed values");
+    public List<Rate> fetchRates(String baseCurrency, List<String> codes) {
+        if (StringUtils.isBlank(baseCurrency)) {
+            log.warn("Cannot perform request. Base currency is empty");
+            throw new NoSuchElementException("Cannot perform request. Base currency is empty");
         }
-        List<Rate> rates = currencyExchangeDataService.getExchangeCurrencyRate(currency.getCode(),
-                codes);
-        Map<String, UUID> currencyCodeToUUID = currencyRepository.getAllByCodeIn(codes).stream()
-                .collect(Collectors.toMap(Currency::getCode, Currency::getId));
-        rates.forEach(rate -> {
-            if (currencyCodeToUUID.containsKey(rate)) {
-                rate.setId(currencyCodeToUUID.get(rate.getSource()));
-            }
+        List<Rate> currencyRates = CurrencyMapper.INSTANCE.currencyRatesDtosToRates(currencyExchangeDataService.getExchangeCurrencyRate(baseCurrency,
+                codes));
+        List<String> currencyCodes = ListUtils.union(codes, List.of(baseCurrency));
+        Map<String, Currency> currencyCodeToUUID = currencyRepository.getAllByCodeIn(currencyCodes).stream()
+                .collect(Collectors.toMap(Currency::getCode, identity()));
+        currencyRates.forEach(rate -> {
+            rate.setBase(currencyCodeToUUID.get(baseCurrency));
+            rate.setSource(currencyCodeToUUID.get(rate.getSource().getCode()));
         });
-        currencyRateRepository.saveAll(rates);
-        return rates;
+        currencyRateRepository.saveAll(currencyRates);
+        return currencyRates;
     }
 
     @Override
-    @Cacheable(value = CacheConfig.RATE_CACHE_NAME,
-            key = "T(java.lang.String).format('%s-%s-%s-%s', 'BASE', #currency.code, #requestPeriod.from, #requestPeriod.to)")
-    public List<Rate> getCurrencyRatesByBase(Currency currency, RequestPeriod requestPeriod) {
-        List<Rate> rates = currencyRateRepository.findAllByBaseAndDateBetweenOrderByDateDesc(currency,
-                requestPeriod.getFrom(),
+    @Cacheable(value = CacheConfig.RATE_CACHE_NAME, keyGenerator = "ratesKeyGenerator")
+    public List<Rate> getCurrencyRates(String baseCurrency, List<String> sourceCurrencies, RequestPeriod requestPeriod) {
+        List<Rate> rates = currencyRateRepository.findAllByDateBetweenOrderByDateDesc(requestPeriod.getFrom(),
                 requestPeriod.getTo());
-        log.info("Getting currency rates by base: {}", rates.size());
-        return rates;
-    }
-
-    @Override
-    @Cacheable(value = CacheConfig.RATE_CACHE_NAME,
-            key = "T(java.lang.String).format('%s-%s-%s-%s', 'SOURCE', #currency.code, #requestPeriod.from, #requestPeriod.to)")
-    public List<Rate> getCurrencyRatesBySource(Currency currency, RequestPeriod requestPeriod) {
-        List<Rate> rates = currencyRateRepository.findAllBySourceAndDateBetweenOrderByDateDesc(currency, requestPeriod.getFrom(), requestPeriod.getTo());
-        log.info("Getting currency rates by source: {}", rates.size());
-        return rates;
-    }
-
-    @Override
-    public List<Rate> getCurrencyRates(Currency baseCurrency, List<Currency> sourceCurrencies, RequestPeriod requestPeriod) {
-        return null;
-    }
-
-    @Override
-    @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
-    public void removeRatesBySource(String code) {
-        //not implemeted
-    }
-
-    @Override
-    public List<Rate> getCurrencyRatesByPeriod(RequestPeriod requestPeriod) {
-        return currencyRateRepository.findAllByDateBetweenOrderByDateDesc(requestPeriod.getFrom(), requestPeriod.getTo());
+        return rates.stream()
+                .filter(bc -> baseCurrency.equals(bc.getBase().getCode()) &&
+                        sourceCurrencies.contains(bc.getSource().getCode()))
+                .collect(Collectors.toList());
     }
 }

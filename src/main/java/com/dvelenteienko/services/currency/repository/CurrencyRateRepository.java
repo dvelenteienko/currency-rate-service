@@ -10,15 +10,15 @@ import java.util.UUID;
 
 public interface CurrencyRateRepository extends JpaRepository<Rate, UUID> {
 
-    List<Rate> findAllByBaseAndDateBetweenOrderByDateDesc(Currency baseCurrency, LocalDateTime from, LocalDateTime to);
+//    List<Rate> findAllByBaseAndDateBetweenOrderByDateDesc(Currency baseCurrency, LocalDateTime from, LocalDateTime to);
 
-    List<Rate> findAllBySourceAndDateBetweenOrderByDateDesc(Currency sourceCurrency, LocalDateTime from, LocalDateTime to);
-    List<Rate> findAllByBaseAndSourceInAndDateBetweenOrderByDateDesc(Currency sourceCurrency,
-                                                                     List<Currency> sourceCurrencies,
-                                                                     LocalDateTime from, LocalDateTime to);
+//    List<Rate> findAllBySourceAndDateBetweenOrderByDateDesc(Currency sourceCurrency, LocalDateTime from, LocalDateTime to);
+//    List<Rate> findAllByBaseAndSourceInAndDateBetweenOrderByDateDesc(Currency sourceCurrency,
+//                                                                     List<Currency> sourceCurrencies,
+//                                                                     LocalDateTime from, LocalDateTime to);
 
     List<Rate> findAllByDateBetweenOrderByDateDesc(LocalDateTime from, LocalDateTime to);
 
-    boolean existsBySource(Currency sourceCurrency);
+//    boolean existsBySource(Currency sourceCurrency);
 
 }

@@ -38,9 +38,12 @@ public class CurrencyController {
 
     @DeleteMapping("/{code}")
     public ResponseEntity deleteCurrency(@PathVariable String code) {
-        Currency currency = currencyService.getCurrencyByCode(code);
+        Currency currency = currencyService.getCurrencies().stream()
+                .filter(c -> code.equals(c.getCode()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("The currency with code [%s] does not exist", code)));
         currencyService.removeCurrency(currency);
-        currencyRateService.removeRatesBySource(currency.getCode());
         return ResponseEntity.ok().build();
     }
 

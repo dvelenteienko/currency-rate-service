@@ -33,17 +33,17 @@ public class DefaultCurrencyExchangeDataService implements CurrencyExchangeDataS
 
     @Cacheable(value = CacheConfig.RATE_CACHE_NAME, key = "#baseCurrency")
     @Override
-    public List<Rate> getExchangeCurrencyRate(String baseCurrency, List<String> codes) {
-        List<Rate> rates = new ArrayList<>();
+    public List<CurrencyRateDTO> getExchangeCurrencyRate(String baseCurrency, List<String> codes) {
+        List<CurrencyRateDTO> rates = new ArrayList<>();
         if (StringUtils.isNotBlank(baseCurrency) && !codes.isEmpty()) {
             CurrencyRateResponse response = callCurrencyRateApi(baseCurrency, codes);
             final LocalDateTime lastUpdatedAt = parseDate(response.meta().lastUpdatedAt());
             rates = response.data().values().stream()
-                    .map(currencyData -> Rate.builder()
-                            .setSource(Currency.builder().setCode(currencyData.code()).build())
-                            .setBase(Currency.builder().setCode(baseCurrency).build())
-                            .setDate(lastUpdatedAt)
-                            .setRate(currencyData.value())
+                    .map(currencyData -> CurrencyRateDTO.builder()
+                            .baseCurrency(baseCurrency)
+                            .sourceCurrency(currencyData.code())
+                            .date(lastUpdatedAt)
+                            .rate(currencyData.value())
                             .build())
                     .collect(Collectors.toList());
         }

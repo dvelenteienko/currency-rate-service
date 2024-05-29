@@ -8,7 +8,8 @@ import java.util.List;
 public interface CurrencyService {
     List<Currency> getCurrencies();
 
-    Currency getCurrencyByCode(String code);
+//    Currency getCurrencyByCode(String code);
+//    List<Currency> getCurrencyByCodes(List<String> currencyCodes);
 
     Currency createCurrency(String code);
 
