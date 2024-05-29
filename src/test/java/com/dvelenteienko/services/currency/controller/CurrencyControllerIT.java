@@ -3,8 +3,9 @@ package com.dvelenteienko.services.currency.controller;
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
-import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.payload.ErrorResponse;
+import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
+import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,15 +45,15 @@ class CurrencyControllerIT {
 
     @Test
     public void getCurrencies_WhenRequested_ThenCurrencyReturnHttpStatusOk() throws Exception {
-        CurrencyDTO currencyDTOUSDBase = CurrencyDTO.builder()
+        Currency currencyUSDBase = Currency.builder()
                 .setCode("USD")
                 .build();
-        CurrencyDTO currencyDTOEURSource = CurrencyDTO.builder()
+        Currency currencyEURSource = Currency.builder()
                 .setCode("EUR")
                 .build();
-        List<CurrencyDTO> response = List.of(currencyDTOUSDBase, currencyDTOEURSource);
+        List<Currency> response = List.of(currencyUSDBase, currencyEURSource);
         when(currencyService.getCurrencies()).thenReturn(response);
-        String responseJson = objectMapper.writeValueAsString(response);
+        String responseJson = objectMapper.writeValueAsString(CurrencyMapper.INSTANCE.currenciesToCurrencyDtos(response));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get(CURRENCY_REQUEST_URL)
@@ -63,14 +66,14 @@ class CurrencyControllerIT {
     @Test
     public void addCurrency_WhenRequestedCurrencyExist_ThenHandleException() throws Exception {
         CurrencyDTO requestCurrencyDTO = CurrencyDTO.builder()
-                .setCode("USD")
+                .code("USD")
                 .build();
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message("Currency already exists")
                 .statusCode(HttpStatus.BAD_REQUEST)
                 .requestedUrl(CURRENCY_REQUEST_URL)
                 .build();
-        when(currencyService.createCurrency("USD", CurrencyType.BASE))
+        when(currencyService.createCurrency("USD"))
                 .thenThrow(new IllegalArgumentException("Currency already exists"));
         String requestJson = objectMapper.writeValueAsString(requestCurrencyDTO);
         String responseString = objectMapper.writeValueAsString(errorResponse);
@@ -87,12 +90,18 @@ class CurrencyControllerIT {
     @Test
     public void deleteCurrency_WhenRequestedWithCode_ThenReturnHttpStatusOk() throws Exception {
         String currencyCode = "USD";
+        Currency currencyToRemove = Currency.builder()
+                .setCode(currencyCode)
+                .setId(UUID.randomUUID())
+                .build();
+
+        when(currencyService.getCurrencies()).thenReturn(List.of(currencyToRemove));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete(CURRENCY_REQUEST_URL + "/{code}", currencyCode))
                 .andExpect(status().isOk());
 
-        verify(currencyService).removeCurrency(currencyCode);
+        verify(currencyService).removeCurrency(currencyToRemove);
     }
 
 }

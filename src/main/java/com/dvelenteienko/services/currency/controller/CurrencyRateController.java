@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 @RestController
 @AllArgsConstructor
@@ -40,10 +39,7 @@ public class CurrencyRateController {
         String targetCode = code.toUpperCase();
         final LocalDate from = LocalDate.parse(dateFrom);
         final LocalDate to = LocalDate.parse(dateTo);
-        List<String> currencyCodes = currencyService.getCurrencies().stream()
-                .map(Currency::getCode)
-                .filter(cCode -> !cCode.equals(targetCode))
-                .toList();
+        List<String> currencyCodes = getCurrencyCodes(Collections.emptyList(), targetCode);
         RequestPeriod requestPeriod = prepareRequestedPeriod(from, to);
         if (!requestPeriod.isValid()) {
             throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
@@ -61,7 +57,9 @@ public class CurrencyRateController {
         currenciesToFetch.replaceAll(String::toUpperCase);
         LocalDate prevDay = LocalDate.now().minusDays(1);
         RequestPeriod requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
-        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(getRates(targetCode, currenciesToFetch,
+        List<String> currencyCodes = getCurrencyCodes(currenciesToFetch, targetCode);
+
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(getRates(targetCode, currencyCodes,
                 requestPeriod)));
     }
 
@@ -74,9 +72,10 @@ public class CurrencyRateController {
             List<String> sourceCurrencyCodes = rates.stream()
                     .map(r -> r.getSource().getCode())
                     .toList();
-            currenciesToFetch.addAll(sourceCurrencyCodes);
-            List<String> remainingCurrencyCodes = currenciesToFetch.stream()
-                    .filter(rcc -> Collections.frequency(currenciesToFetch, rcc) == 1)
+            Set<String> currenciesToRemain = new HashSet<>(currenciesToFetch);
+            currenciesToRemain.addAll(sourceCurrencyCodes);
+            List<String> remainingCurrencyCodes = currenciesToRemain.stream()
+                    .filter(rcc -> rates.stream().noneMatch(r -> rcc.equals(r.getSource().getCode())))
                     .toList();
             if (!remainingCurrencyCodes.isEmpty()) {
                 fetchedRates = currencyRateService.fetchRates(targetCode, remainingCurrencyCodes);
@@ -98,6 +97,31 @@ public class CurrencyRateController {
                 .setFrom(from.atStartOfDay())
                 .setTo(endOfDay)
                 .build();
+    }
+
+    private List<String> getCurrencyCodes(List<String> currencyCodes, String baseCode) {
+        String errorMessage = "Currency [%s] does not exist";
+        if (currencyCodes.contains(baseCode)) {
+            throw new IllegalArgumentException(String.format("Cannot get rates of itself code [%s]", baseCode));
+        }
+        List<String> currencies = currencyService.getCurrencies().stream()
+                .map(Currency::getCode)
+                .toList();
+        List<String> notInCommonCodes = currencyCodes.stream()
+                .filter(c -> !currencies.contains(c))
+                .toList();
+        if (!notInCommonCodes.isEmpty()) {
+            throw new NoSuchElementException(String.format(errorMessage, String.join(",", notInCommonCodes)));
+        }
+        Predicate<String> filterCodesPredicate;
+        if (currencyCodes.isEmpty()) {
+            filterCodesPredicate = c -> !baseCode.equals(c);
+        } else {
+            filterCodesPredicate = c -> !baseCode.equals(c) && currencyCodes.contains(c);
+        }
+        return currencies.stream()
+                .filter(filterCodesPredicate)
+                .toList();
     }
 
 }

@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,15 +28,6 @@ public class DefaultCurrencyService implements CurrencyService {
     public List<Currency> getCurrencies() {
         return currencyRepository.findAll();
     }
-
-//    @Override
-//    public Currency getCurrencyByCode(String code) {
-//        Currency currency = currencyRepository.getByCode(code);
-//        if (currency != null) {
-//            return currency;
-//        }
-//        return Currency.builder().build();
-//    }
 
     @Override
     @CacheEvict(value = CacheConfig.CURRENCY_CACHE_NAME, allEntries = true)
@@ -61,11 +51,4 @@ public class DefaultCurrencyService implements CurrencyService {
         log.info(String.format("Removed [%s]", currency));
         currencyRepository.delete(currency);
     }
-
-//    @Override
-//    public List<Currency> getCurrencyByCodes(List<String> currencyCodes) {
-//        return getCurrencies().stream()
-//                .filter(c -> currencyCodes.contains(c.getCode()))
-//                .collect(Collectors.toList());
-//    }
 }

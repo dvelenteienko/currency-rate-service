@@ -37,7 +37,7 @@ public class CurrencyController {
     }
 
     @DeleteMapping("/{code}")
-    public ResponseEntity deleteCurrency(@PathVariable String code) {
+    public ResponseEntity removeCurrency(@PathVariable String code) {
         Currency currency = currencyService.getCurrencies().stream()
                 .filter(c -> code.equals(c.getCode()))
                 .findFirst()
