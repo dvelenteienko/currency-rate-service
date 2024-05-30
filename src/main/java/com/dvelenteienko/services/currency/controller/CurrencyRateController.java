@@ -44,7 +44,7 @@ public class CurrencyRateController {
         if (!requestPeriod.isValid()) {
             throw new IllegalArgumentException(String.format("Date range is not valid. From: [%s] To:[%s]", dateFrom, dateTo));
         }
-        List<Rate> rates = currencyRateService.getCurrencyRates(targetCode, currencyCodes, requestPeriod);
+        List<Rate> rates = currencyRateService.getRates(targetCode, currencyCodes, requestPeriod);
         return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
     }
 
@@ -58,33 +58,9 @@ public class CurrencyRateController {
         LocalDate prevDay = LocalDate.now().minusDays(1);
         RequestPeriod requestPeriod = prepareRequestedPeriod(prevDay, prevDay);
         List<String> currencyCodes = getCurrencyCodes(currenciesToFetch, targetCode);
+        List<Rate> rates = currencyRateService.persisRates(targetCode, currencyCodes, requestPeriod);
 
-        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(getRates(targetCode, currencyCodes,
-                requestPeriod)));
-    }
-
-    private List<Rate> getRates(String targetCode, List<String> currenciesToFetch, RequestPeriod requestPeriod) {
-        List<Rate> fetchedRates;
-        List<Rate> rates = currencyRateService.getCurrencyRates(targetCode, currenciesToFetch, requestPeriod);
-        if (rates.isEmpty()) {
-            fetchedRates = currencyRateService.fetchRates(targetCode, currenciesToFetch);
-        } else {
-            List<String> sourceCurrencyCodes = rates.stream()
-                    .map(r -> r.getSource().getCode())
-                    .toList();
-            Set<String> currenciesToRemain = new HashSet<>(currenciesToFetch);
-            currenciesToRemain.addAll(sourceCurrencyCodes);
-            List<String> remainingCurrencyCodes = currenciesToRemain.stream()
-                    .filter(rcc -> rates.stream().noneMatch(r -> rcc.equals(r.getSource().getCode())))
-                    .toList();
-            if (!remainingCurrencyCodes.isEmpty()) {
-                fetchedRates = currencyRateService.fetchRates(targetCode, remainingCurrencyCodes);
-                fetchedRates.addAll(rates);
-            } else {
-                return rates;
-            }
-        }
-        return fetchedRates;
+        return ResponseEntity.ok(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
     }
 
     private RequestPeriod prepareRequestedPeriod(LocalDate from, LocalDate to) {

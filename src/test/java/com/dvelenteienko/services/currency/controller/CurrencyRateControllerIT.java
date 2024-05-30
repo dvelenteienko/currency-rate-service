@@ -2,10 +2,10 @@ package com.dvelenteienko.services.currency.controller;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
-import com.dvelenteienko.services.currency.domain.dto.CurrencyRateDTO;
-import com.dvelenteienko.services.currency.domain.entity.enums.CurrencyType;
+import com.dvelenteienko.services.currency.domain.entity.Currency;
+import com.dvelenteienko.services.currency.domain.entity.Rate;
 import com.dvelenteienko.services.currency.domain.entity.payload.ErrorResponse;
+import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import com.dvelenteienko.services.currency.util.RequestPeriod;
@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -38,7 +39,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CurrencyRateControllerIT {
 
     private static final String BASE_CODE = "USD";
+    private static final Currency BASE_CURRENCY = Currency.builder().setCode(BASE_CODE).build();
     private static final String SOURCE_CODE = "EUR";
+    private static final Currency SOURCE_CURRENCY = Currency.builder().setCode(SOURCE_CODE).build();
     private static final String CURRENCY_CODE_REQUEST_PARAM = "code";
     private static final String CURRENCY_CODES_REQUEST_PARAM = "currencies";
     private static final String DATE_FROM_REQUEST_PARAM = "dateFrom";
@@ -60,15 +63,15 @@ class CurrencyRateControllerIT {
         String dateFromStr = "2024-03-01";
         String dateToStr = "2024-03-03";
         LocalDateTime responseDatetime = LocalDateTime.of(2024, 3, 3, 23, 59, 59);
-        CurrencyRateDTO currencyRateDto = CurrencyRateDTO.builder()
+        Rate currencyRate = Rate.builder()
                 .setRate(1.0)
                 .setDate(responseDatetime)
-                .setBase(BASE_CODE)
-                .setSource(SOURCE_CODE)
+                .setBase(Currency.builder().setCode(BASE_CODE).build())
+                .setSource(Currency.builder().setCode(SOURCE_CODE).build())
                 .build();
-        List<CurrencyRateDTO> response = List.of(currencyRateDto);
-        when(currencyRateService.getCurrencyRates(anyString(), any(RequestPeriod.class), any(CurrencyType.class))).thenReturn(List.of(currencyRateDto));
-        String responseJson = objectMapper.writeValueAsString(response);
+        List<Rate> response = List.of(currencyRate);
+        when(currencyRateService.getRates(anyString(), anyList(), any(RequestPeriod.class))).thenReturn(List.of(currencyRate));
+        String responseJson = objectMapper.writeValueAsString(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(response));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get(RATE_REQUEST_URL)
@@ -108,26 +111,17 @@ class CurrencyRateControllerIT {
 
     @Test
     public void exchangeCurrencyRates_WhenRequestedWithValidParams_ThenExchangeCurrencyRatesAndHttpStatusOk() throws Exception {
-        CurrencyDTO currencyDTOBase = CurrencyDTO.builder()
-                .setCode(BASE_CODE)
-                .setType(CurrencyType.BASE)
-                .build();
-        CurrencyDTO currencyDTOSource = CurrencyDTO.builder()
-                .setCode(SOURCE_CODE)
-                .setType(CurrencyType.BASE)
-                .build();
-        List<CurrencyRateDTO> currencyRateDTOS = List.of(CurrencyRateDTO.builder()
+        List<Rate> rates = List.of(Rate.builder()
                 .setRate(1.0)
-                .setBase(BASE_CODE)
-                .setSource(SOURCE_CODE)
+                .setBase(BASE_CURRENCY)
+                .setSource(SOURCE_CURRENCY)
                 .setDate(LocalDateTime.of(2024, 5, 1, 23, 59, 59))
                 .build());
-        List<CurrencyDTO> currencies = List.of(currencyDTOBase, currencyDTOSource);
-        when(currencyService.getCurrencies()).thenReturn(currencies);
-        when(currencyRateService.getCurrencyRates(anyString(), any(RequestPeriod.class), any(CurrencyType.class)))
+        when(currencyService.getCurrencies()).thenReturn(List.of(BASE_CURRENCY, SOURCE_CURRENCY));
+        when(currencyRateService.getRates(anyString(), anyList(), any(RequestPeriod.class)))
                 .thenReturn(List.of());
-        when(currencyRateService.fetchRates(anyString(), anyList())).thenReturn(currencyRateDTOS);
-        String responseJson = objectMapper.writeValueAsString(currencyRateDTOS);
+        when(currencyRateService.persisRates(anyString(), anyList())).thenReturn(rates);
+        String responseJson = objectMapper.writeValueAsString(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get(EXCHANGE_CURRENCY_RATES_REQUEST_URL, BASE_CODE)
@@ -141,24 +135,17 @@ class CurrencyRateControllerIT {
 
     @Test
     public void exchangeCurrencyRates_WhenRequestedCurrenciesWithExistingRates_ThenReturnErrorMessageAndHttpStatusBadRequest() throws Exception {
-        CurrencyDTO currencyDTOBase = CurrencyDTO.builder()
-                .setCode(BASE_CODE)
-                .setType(CurrencyType.BASE)
-                .build();
-        CurrencyDTO currencyDTOSource = CurrencyDTO.builder()
-                .setCode(SOURCE_CODE)
-                .setType(CurrencyType.BASE)
-                .build();
-        List<CurrencyRateDTO> currencyRateDTOS = List.of(CurrencyRateDTO.builder()
+        List<Rate> rates = List.of(Rate.builder()
                 .setRate(1.0)
-                .setBase(BASE_CODE)
-                .setSource(SOURCE_CODE)
+                .setBase(BASE_CURRENCY)
+                .setSource(SOURCE_CURRENCY)
                 .setDate(LocalDateTime.of(2024, 5, 1, 23, 59, 59))
                 .build());
-        List<CurrencyDTO> currencies = List.of(currencyDTOBase, currencyDTOSource);
-        when(currencyService.getCurrencies()).thenReturn(currencies);
-        when(currencyRateService.getCurrencyRates(anyString(), any(RequestPeriod.class), any(CurrencyType.class)))
-                .thenReturn(currencyRateDTOS);
+        when(currencyService.getCurrencies()).thenReturn(List.of(BASE_CURRENCY, SOURCE_CURRENCY));
+        when(currencyRateService.getRates(anyString(), anyList(), any(RequestPeriod.class)))
+                .thenReturn(rates);
+        when(currencyRateService.persisRates(anyString(), anyList())).thenReturn(rates);
+        String responseJson = objectMapper.writeValueAsString(CurrencyMapper.INSTANCE.ratesToCurrencyRatesDTOs(rates));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get(EXCHANGE_CURRENCY_RATES_REQUEST_URL, BASE_CODE)

@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 public class CurrencyController {
 
     private final CurrencyService currencyService;
-    private final CurrencyRateService currencyRateService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getCurrencies() {
