@@ -7,9 +7,12 @@ import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
 import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -29,14 +32,14 @@ public class CurrencyController {
 
     @Operation(description = "Note: if type does not present then 'SOURCE' will be applied")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity addCurrency(@RequestBody CurrencyDTO currencyRequest) throws URISyntaxException {
+    public ResponseEntity addCurrency(@RequestBody @Valid CurrencyDTO currencyRequest) throws URISyntaxException {
         Currency currency = currencyService.createCurrency(currencyRequest.getCode());
-        return ResponseEntity.created(new URI(Api.BASE_URL + "/currencies"))
+        return ResponseEntity.created(new URI(Api.BASE_URL + "/currency"))
                 .body(CurrencyMapper.INSTANCE.currencyToCurrencyDTO(currency));
     }
 
-    @DeleteMapping("/{code}")
-    public ResponseEntity removeCurrency(@PathVariable String code) {
+    @DeleteMapping(value = "/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity removeCurrency(@PathVariable @NotBlank String code) {
         Currency currency = currencyService.getCurrencies().stream()
                 .filter(c -> code.equals(c.getCode()))
                 .findFirst()

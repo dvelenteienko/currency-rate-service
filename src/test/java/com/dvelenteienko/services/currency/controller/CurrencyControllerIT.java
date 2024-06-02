@@ -1,24 +1,12 @@
 package com.dvelenteienko.services.currency.controller;
 
-import com.dvelenteienko.services.currency.controller.api.Api;
-import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
 import com.dvelenteienko.services.currency.domain.dto.CurrencyDTO;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.domain.entity.payload.ErrorResponse;
 import com.dvelenteienko.services.currency.domain.mapper.CurrencyMapper;
-import com.dvelenteienko.services.currency.service.CurrencyService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
@@ -29,19 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(CurrencyController.class)
-@ContextConfiguration(classes = {CurrencyController.class, GlobalControllerExceptionHandler.class})
-class CurrencyControllerIT {
-    private static final String CURRENCY_REQUEST_URL = Api.BASE_URL + "/currency";
-
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @MockBean
-    private CurrencyService currencyService;
+class CurrencyControllerIT extends AbstractTestController {
 
     @Test
     public void getCurrencies_WhenRequested_ThenCurrencyReturnHttpStatusOk() throws Exception {

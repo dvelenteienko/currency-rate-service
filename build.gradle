@@ -39,6 +39,8 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+	// https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator
+	implementation 'org.hibernate.validator:hibernate-validator'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 	compileOnly 'org.projectlombok:lombok:1.18.20'

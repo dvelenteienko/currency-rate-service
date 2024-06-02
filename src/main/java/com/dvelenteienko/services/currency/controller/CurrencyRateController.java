@@ -8,6 +8,8 @@ import com.dvelenteienko.services.currency.service.CurrencyRateService;
 import com.dvelenteienko.services.currency.service.CurrencyService;
 import com.dvelenteienko.services.currency.util.RequestPeriod;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 @RestController
@@ -31,11 +36,11 @@ public class CurrencyRateController {
     private final CurrencyService currencyService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCurrencyRates(@RequestParam String code,
+    public ResponseEntity<?> getCurrencyRates(@RequestParam @NotBlank String code,
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
-                                              @RequestParam String dateFrom,
+                                              @RequestParam @NotBlank String dateFrom,
                                               @Parameter(description = "Note: date format must be 'yyyy-mm-dd'")
-                                              @RequestParam String dateTo) {
+                                              @RequestParam @NotBlank String dateTo) {
         String targetCode = code.toUpperCase();
         final LocalDate from = LocalDate.parse(dateFrom);
         final LocalDate to = LocalDate.parse(dateTo);
@@ -49,8 +54,8 @@ public class CurrencyRateController {
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> exchangeCurrencyRates(@RequestParam String code,
-                                                   @RequestParam List<String> currencies) {
+    public ResponseEntity<?> exchangeCurrencyRates(@RequestParam @NotBlank String code,
+                                                   @RequestParam List<@Size(min = 1) String> currencies) {
 
         String targetCode = code.toUpperCase();
         List<String> currenciesToFetch = new ArrayList<>(currencies);
@@ -76,7 +81,6 @@ public class CurrencyRateController {
     }
 
     private List<String> getCurrencyCodes(List<String> currencyCodes, String baseCode) {
-        String errorMessage = "Currency [%s] does not exist";
         if (currencyCodes.contains(baseCode)) {
             throw new IllegalArgumentException(String.format("Cannot get rates of itself code [%s]", baseCode));
         }
@@ -87,7 +91,7 @@ public class CurrencyRateController {
                 .filter(c -> !currencies.contains(c))
                 .toList();
         if (!notInCommonCodes.isEmpty()) {
-            throw new NoSuchElementException(String.format(errorMessage, String.join(",", notInCommonCodes)));
+            throw new NoSuchElementException(String.format("Currency [%s] does not exist", String.join(",", notInCommonCodes)));
         }
         Predicate<String> filterCodesPredicate;
         if (currencyCodes.isEmpty()) {

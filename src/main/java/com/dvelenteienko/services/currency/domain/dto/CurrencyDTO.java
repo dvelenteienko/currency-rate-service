@@ -1,6 +1,7 @@
 package com.dvelenteienko.services.currency.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,7 +17,7 @@ public class CurrencyDTO {
 
     @JsonIgnore
     private UUID id;
-
+    @NotBlank
     private String code;
 
 }
