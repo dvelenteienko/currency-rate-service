@@ -37,7 +37,7 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
         return getCurrentRates(baseCurrency, sourceCurrencies, requestPeriod);
     }
 
-    //    @Override
+    @Override
     @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
     public List<Rate> persisRates(String baseCurrency, List<String> codes, RequestPeriod requestPeriod) {
         if (StringUtils.isBlank(baseCurrency)) {
@@ -50,6 +50,7 @@ public class DefaultCurrencyRateService implements CurrencyRateService {
     }
 
     @Override
+    @CacheEvict(value = CacheConfig.RATE_CACHE_NAME, allEntries = true)
     public void fetchAndPersistRates(String baseCode, List<String> codes) {
         List<Rate> rates = fetchRates(baseCode, codes);
         saveRates(rates);

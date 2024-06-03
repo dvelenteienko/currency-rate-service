@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -65,7 +65,7 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .statusCode(HttpStatus.resolve(status.value()))
                 .message(messages)
-                .requestedUrl(Api.BASE_URL + request.getContextPath())
+                .requestedUrl(request.getDescription(false).replace("uri=", ""))
                 .build();
         return buildResponseEntity(errorResponse);
     }

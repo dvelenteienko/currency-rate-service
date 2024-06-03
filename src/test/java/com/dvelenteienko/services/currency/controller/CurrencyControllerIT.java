@@ -80,4 +80,20 @@ class CurrencyControllerIT extends AbstractTestController {
         verify(currencyService).removeCurrency(currencyToRemove);
     }
 
+    @Test
+    public void deleteCurrency_WhenCurrencyCodeIsBlank_ThenReturnHttpStatusBadRequest() throws Exception {
+        String currencyCode = " ";
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message("code must not be blank")
+                .statusCode(HttpStatus.BAD_REQUEST)
+                .requestedUrl(CURRENCY_REQUEST_URL + "/%20")
+                .build();
+        String responseString = objectMapper.writeValueAsString(errorResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete(CURRENCY_REQUEST_URL + "/{code}", currencyCode))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(responseString));
+    }
+
 }

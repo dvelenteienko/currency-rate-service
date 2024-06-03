@@ -91,7 +91,9 @@ public class CurrencyRateController {
                 .filter(c -> !currencies.contains(c))
                 .toList();
         if (!notInCommonCodes.isEmpty()) {
-            throw new NoSuchElementException(String.format("Currency [%s] does not exist", String.join(",", notInCommonCodes)));
+            throw new NoSuchElementException(String.format("Currency [%s] does not exist. Existing currencies [%s] ",
+                    String.join(",", notInCommonCodes),
+                    String.join(",", currencies)));
         }
         Predicate<String> filterCodesPredicate;
         if (currencyCodes.isEmpty()) {
