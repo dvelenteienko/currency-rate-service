@@ -1,6 +1,7 @@
 package com.dvelenteienko.services.currency.controller;
 
-import com.dvelenteienko.services.currency.config.ClientWebConfig;
+import com.dvelenteienko.services.currency.controller.CurrencyController;
+import com.dvelenteienko.services.currency.controller.CurrencyRateController;
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
 import com.dvelenteienko.services.currency.domain.entity.Currency;

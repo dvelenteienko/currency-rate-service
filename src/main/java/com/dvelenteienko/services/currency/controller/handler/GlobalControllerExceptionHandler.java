@@ -2,11 +2,13 @@ package com.dvelenteienko.services.currency.controller.handler;
 
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.domain.entity.payload.ErrorResponse;
+import com.dvelenteienko.services.currency.exception.DefaultJwtTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,7 +23,7 @@ import java.util.NoSuchElementException;
 public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
-    protected ResponseEntity<Object> handleCurrencyNotFound(NoSuchElementException ex, HttpServletRequest request) {
+    protected ResponseEntity<Object> handleNoSuchElementException(NoSuchElementException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .statusCode(HttpStatus.NOT_FOUND)
                 .message(ex.getMessage())
@@ -30,10 +32,20 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
         return buildResponseEntity(errorResponse);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    protected ResponseEntity<Object> handleCurrencyConflicts(IllegalArgumentException ex, HttpServletRequest request) {
+    @ExceptionHandler(value = {IllegalArgumentException.class, DefaultJwtTokenException.class})
+    protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .statusCode(HttpStatus.BAD_REQUEST)
+                .message(ex.getMessage())
+                .requestedUrl(request.getRequestURI())
+                .build();
+        return buildResponseEntity(errorResponse);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    protected ResponseEntity<Object> handleAuthException(AuthenticationException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED)
                 .message(ex.getMessage())
                 .requestedUrl(request.getRequestURI())
                 .build();
