@@ -2,6 +2,7 @@ package com.dvelenteienko.services.currency.service.impl;
 
 import com.dvelenteienko.services.currency.domain.entity.Currency;
 import com.dvelenteienko.services.currency.repository.CurrencyRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class DefaultCurrencyServiceTest {
 

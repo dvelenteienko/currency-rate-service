@@ -97,9 +97,10 @@ class CurrencyRateControllerIT extends AbstractTestController {
     @Test
     public void exchangeCurrencyRates_WhenRequestedWithInvalidCurrency_ThenReturnErrorMessageAndHttpStatusBadRequest() throws Exception {
         String wrongCurrency = "USSD";
-        String errorMessage = String.format("Currency [%s] does not exist", wrongCurrency);
         Currency baseCurrency = Currency.builder().setCode(BASE_CODE).build();
         Currency sourceCurrency = Currency.builder().setCode(SOURCE_CODE).build();
+        String errorMessage = String.format("Currency %s does not exist. Existing currencies %s",
+                List.of(wrongCurrency), List.of(BASE_CODE, SOURCE_CODE));
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(errorMessage)
