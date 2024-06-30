@@ -4,6 +4,7 @@ import com.dvelenteienko.services.currency.rest.jwt.JwtRequestFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,6 +22,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 @Configuration
 @EnableWebSecurity
+@Profile("!test")
 @AllArgsConstructor
 public class SecurityConfig {
 

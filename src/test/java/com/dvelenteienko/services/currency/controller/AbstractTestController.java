@@ -1,7 +1,6 @@
 package com.dvelenteienko.services.currency.controller;
 
-import com.dvelenteienko.services.currency.controller.CurrencyController;
-import com.dvelenteienko.services.currency.controller.CurrencyRateController;
+import com.dvelenteienko.services.currency.config.ApplicationNoSecurity;
 import com.dvelenteienko.services.currency.controller.api.Api;
 import com.dvelenteienko.services.currency.controller.handler.GlobalControllerExceptionHandler;
 import com.dvelenteienko.services.currency.domain.entity.Currency;
@@ -20,7 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(value = {CurrencyRateController.class, CurrencyController.class})
-@ContextConfiguration(classes = {CurrencyRateController.class, CurrencyController.class, GlobalControllerExceptionHandler.class})
+@ContextConfiguration(classes = {CurrencyRateController.class,
+        CurrencyController.class,
+        GlobalControllerExceptionHandler.class,
+        ApplicationNoSecurity.class})
 public abstract class AbstractTestController {
 
     public static final String BASE_CODE = "USD";
